@@ -38,6 +38,7 @@ private:
 
     CustomFlowScene* _nodeScene;
     FlowView* _nodeView;
+    QWidget* _viewportContainer;
     RenderViewWidget* _renderView;
     GraphView* _pathView;
     QDockWidget* _dockView;

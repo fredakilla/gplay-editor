@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QMenuBar>
 #include <QApplication>
+#include <QVBoxLayout>
 
 #include "node-editor/common/Nodestyle.h"
 #include "node-editor/spark-nodes/spark-nodes.h"
@@ -75,10 +76,16 @@ MainWindow::MainWindow(QWidget* parent)
     createActions();
     createMenus();
 
+
     _renderView = new RenderViewWidget(this);
 
-    _dockView = new QDockWidget("View", this);
-    _dockView->setWidget(_renderView);
+    _viewportContainer = new QWidget(this);
+    _viewportContainer->setLayout(new QVBoxLayout());
+    _viewportContainer->layout()->addWidget(_renderView);
+
+
+    _dockView = new QDockWidget("Viewport", this);
+    _dockView->setWidget(_viewportContainer);
     _dockView->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::TopDockWidgetArea, _dockView);
 
@@ -120,6 +127,7 @@ MainWindow::~MainWindow()
     delete _nodeScene;
     delete _nodeView;
     delete _renderView;
+    delete _viewportContainer;
     delete _dockView;
     delete _dockNodeGraph;
 }
