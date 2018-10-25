@@ -143,11 +143,11 @@ int main(int argc, char **argv)
 
     QApplication app(argc, argv);
     QCoreApplication::setOrganizationName("fredakilla");
-    QCoreApplication::setApplicationName("spkgen");
+    QCoreApplication::setApplicationName("gplay-editor");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 
 
-    QFile cssFile("estudio4.css");
+
     qApp->setStyle(QStyleFactory::create("Fusion"));
 
     QPalette darkPalette;
@@ -164,10 +164,7 @@ int main(int argc, char **argv)
     darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
     darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
     darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-    qApp->setPalette(darkPalette);
-
-    if (cssFile.open(QFile::ReadOnly))
-        qApp->setStyleSheet(QString(cssFile.readAll()));
+    qApp->setPalette(darkPalette);   
 
 
     MainWindow mainWindow;

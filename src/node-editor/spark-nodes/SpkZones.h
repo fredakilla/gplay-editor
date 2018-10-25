@@ -1,7 +1,7 @@
 #ifndef ZONENODE_H
 #define ZONENODE_H
 
-#include "BaseNode.h"
+#include "../common/BaseNode.h"
 
 //------------------------------------------------------------------------------------------------------------------------------
 // base spark zone class

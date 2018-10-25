@@ -1,7 +1,7 @@
 #ifndef SPKEMITTERS_H
 #define SPKEMITTERS_H
 
-#include "BaseNode.h"
+#include "../common/BaseNode.h"
 
 //------------------------------------------------------------------------------------------------------------------------------
 // base spark emitter class

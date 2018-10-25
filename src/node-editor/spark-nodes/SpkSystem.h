@@ -1,7 +1,7 @@
 #ifndef SPKSYSTEMNODE_H
 #define SPKSYSTEMNODE_H
 
-#include "BaseNode.h"
+#include "../common/BaseNode.h"
 
 //------------------------------------------------------------------------------------------------------------------------------
 // group list

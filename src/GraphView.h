@@ -36,7 +36,7 @@
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QCategoryAxis>
 
-#include "SpkInterpolators.h"
+#include "node-editor/spark-nodes/SpkInterpolators.h"
 
 
 QT_CHARTS_USE_NAMESPACE

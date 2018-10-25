@@ -5,7 +5,7 @@
 #include <QDockWidget>
 
 #include "RenderViewWidget.h"
-#include "CustomFlowScene.h"
+#include "node-editor/common/CustomFlowScene.h"
 #include "GraphView.h"
 
 class MainWindow : public QMainWindow

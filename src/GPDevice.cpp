@@ -3,11 +3,11 @@
 GPDevice* GPDevice::_instance = nullptr;
 
 #include <spark/SPARK.h>
-#include "sparkparticles/SparkParticleEmitter.h"
-#include "sparkparticles/SparkQuadRenderer.h"
-#include "sparkparticles/SparkParticleEmitter.h"
+#include <sparkparticles/SparkParticleEmitter.h>
+#include <sparkparticles/SparkQuadRenderer.h>
+#include <sparkparticles/SparkParticleEmitter.h>
 
-#include "BaseNode.h"
+#include "node-editor/common/BaseNode.h"
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------

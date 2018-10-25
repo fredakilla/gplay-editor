@@ -4,7 +4,7 @@
 #include <sparkparticles/SparkParticleEmitter.h>
 
 #include "SpkSystem.h"
-#include "GPDevice.h"
+#include "../../GPDevice.h"
 
 #include <QEvent>
 #include <QKeyEvent>
@@ -267,7 +267,7 @@ void NodeSparkQuadRenderer::process()
 //------------------------------------------------------------------------------------------------------------------------------
 
 #include <QMessageBox>
-#include "CustomWidgets.h"
+#include "../common/CustomWidgets.h"
 
 NodeSparkTest::NodeSparkTest()
 {

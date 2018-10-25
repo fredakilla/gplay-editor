@@ -1,7 +1,7 @@
 #ifndef SPKINTERPOLATORS_H
 #define SPKINTERPOLATORS_H
 
-#include "BaseNode.h"
+#include "../common/BaseNode.h"
 
 //------------------------------------------------------------------------------------------------------------------------------
 // path node

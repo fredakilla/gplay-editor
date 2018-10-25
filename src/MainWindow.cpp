@@ -5,13 +5,10 @@
 #include <QCloseEvent>
 #include <QDebug>
 #include <QMenuBar>
+#include <QApplication>
 
-#include "Nodestyle.h"
-#include "SpkZones.h"
-#include "SpkSystem.h"
-#include "SpkEmitters.h"
-#include "SpkModifiers.h"
-#include "SpkInterpolators.h"
+#include "node-editor/common/Nodestyle.h"
+#include "node-editor/spark-nodes/spark-nodes.h"
 
 #include <nodes/DataModelRegistry>
 using QtNodes::DataModelRegistry;
@@ -171,7 +168,7 @@ void MainWindow::save()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "APP_NAME",
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, qApp->applicationName(),
                                                                     tr("Are you sure?\n"),
                                                                     QMessageBox::No | QMessageBox::Yes,
                                                                     QMessageBox::Yes);

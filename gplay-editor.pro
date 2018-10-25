@@ -26,7 +26,7 @@ INCLUDEPATH += $$GPLAY_OUTPUT_DIR/include/gplayengine/
 INCLUDEPATH += $$GPLAY_OUTPUT_DIR/include/gplayengine/thirdparty
 
 # nodes editor library
-# build nodeeditor with : cmake .. -DCMAKE_PREFIX_PATH=/opt/Qt5.11.1/5.11.1/gcc_64
+# build nodeeditor with : cmake .. -DCMAKE_PREFIX_PATH=/opt/Qt5.11.1/5.11.1/gcc_64 -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
 DEFINES += NODE_EDITOR_STATIC
 INCLUDEPATH += 3rdparty/nodeeditor/include
 LIBS += -L$$PWD/3rdparty/nodeeditor/BUILD/lib -lnodes
@@ -57,48 +57,49 @@ linux: {
 # files
 #--------------------------------------------------------------------
 SOURCES += \
+    src/node-editor/common/BaseNode.cpp \
+    src/node-editor/common/Color.cpp \
+    src/node-editor/common/CommentGraphicsItem.cpp \
+    src/node-editor/common/CustomFlowScene.cpp \
+    src/node-editor/common/CustomWidgets.cpp \
+    src/node-editor/common/Parameter.cpp \
+    src/node-editor/common/ParamWidget.cpp \
+    src/node-editor/common/Path.cpp \
+    src/node-editor/common/TrackEdit.cpp \
+    src/node-editor/common/Types.cpp \
+    src/node-editor/spark-nodes/SpkEmitters.cpp \
+    src/node-editor/spark-nodes/SpkInterpolators.cpp \
+    src/node-editor/spark-nodes/SpkModifiers.cpp \
+    src/node-editor/spark-nodes/SpkSystem.cpp \
+    src/node-editor/spark-nodes/SpkZones.cpp \
+    src/GPDevice.cpp \
+    src/GraphView.cpp \
     src/main.cpp \
     src/MainWindow.cpp \
-    src/RenderViewWidget.cpp \
-    src/GPDevice.cpp \
-    src/BaseNode.cpp \
-    src/ParamWidget.cpp \
-    src/CustomWidgets.cpp \
-    src/TrackEdit.cpp \
-    src/Types.cpp \
-    src/SpkEmitters.cpp \
-    src/SpkZones.cpp \
-    src/SpkSystem.cpp \
-    src/Parameter.cpp \
-    src/Color.cpp \
-    src/GraphView.cpp \
-    src/SpkModifiers.cpp \
-    src/CommentGraphicsItem.cpp \
-    src/CustomFlowScene.cpp \
-    src/SpkInterpolators.cpp \
-    src/Path.cpp
+    src/RenderViewWidget.cpp
 
 HEADERS += \
+    src/node-editor/common/BaseNode.h \
+    src/node-editor/common/Color.h \
+    src/node-editor/common/CommentGraphicsItem.h \
+    src/node-editor/common/CustomFlowScene.h \
+    src/node-editor/common/CustomWidgets.h \
+    src/node-editor/common/Nodestyle.h \
+    src/node-editor/common/Parameter.h \
+    src/node-editor/common/ParamWidget.h \
+    src/node-editor/common/Path.h \
+    src/node-editor/common/Trackedit.h \
+    src/node-editor/common/Types.h \
+    src/node-editor/spark-nodes/SpkEmitters.h \
+    src/node-editor/spark-nodes/SpkInterpolators.h \
+    src/node-editor/spark-nodes/SpkModifiers.h \
+    src/node-editor/spark-nodes/SpkSystem.h \
+    src/node-editor/spark-nodes/SpkZones.h \
+    src/benchmark.h \
+    src/GPDevice.h \
+    src/GraphView.h \
     src/MainWindow.h \
     src/RenderViewWidget.h \
-    src/GPDevice.h \
-    src/BaseNode.h \
-    src/ParamWidget.h \
-    src/Parameter.h \
-    src/Types.h \
-    src/CustomWidgets.h \
-    src/Trackedit.h \
-    src/SpkEmitters.h \
-    src/SpkZones.h \
-    src/SpkSystem.h \
-    src/Color.h \
-    src/benchmark.h \
-    src/GraphView.h \
-    src/Nodestyle.h \
-    src/SpkModifiers.h \
-    src/CommentGraphicsItem.h \
-    src/CustomFlowScene.h \
-    src/SpkInterpolators.h \
-    src/Path.h
+    src/node-editor/spark-nodes/spark-nodes.h
 
 

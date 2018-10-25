@@ -1,7 +1,7 @@
 #ifndef SPKMODIFIERS_H
 #define SPKMODIFIERS_H
 
-#include "BaseNode.h"
+#include "../common/BaseNode.h"
 
 //------------------------------------------------------------------------------------------------------------------------------
 // base spark modifier class
