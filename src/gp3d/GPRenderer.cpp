@@ -17,8 +17,8 @@ GPRenderer3D::GPRenderer3D()
     loadGrid(_scene);
 
     // Add listeners for events
-    EventManager::get()->addListener(GP_EVENT_LISTENER(this, GPRenderer3D::onMouseEvent), MouseEvent::ID());
-    EventManager::get()->addListener(GP_EVENT_LISTENER(this, GPRenderer3D::onKeyEvent), KeyEvent::ID());
+    EventManager::getInstance()->addListener(GP_EVENT_LISTENER(this, GPRenderer3D::onMouseEvent), MouseEvent::ID());
+    EventManager::getInstance()->addListener(GP_EVENT_LISTENER(this, GPRenderer3D::onKeyEvent), KeyEvent::ID());
 
 }
 
