@@ -8,7 +8,7 @@ include($$PWD/../GPlayEngine/setup.pri)
 # project
 #--------------------------------------------------------------------
 QT += core gui widgets charts
-TARGET = spkgen
+TARGET = gplay-editor
 TEMPLATE = app
 CONFIG += c++14
 CONFIG -= console
@@ -76,7 +76,10 @@ SOURCES += \
     src/GraphView.cpp \
     src/main.cpp \
     src/MainWindow.cpp \
-    src/RenderViewWidget.cpp
+    src/RenderViewWidget.cpp \
+    src/gp3d/helpers/FirstPersonCamera.cpp \
+    src/gp3d/helpers/Grid.cpp \
+    src/gp3d/GPRenderer.cpp
 
 HEADERS += \
     src/node-editor/common/BaseNode.h \
@@ -100,6 +103,10 @@ HEADERS += \
     src/GraphView.h \
     src/MainWindow.h \
     src/RenderViewWidget.h \
-    src/node-editor/spark-nodes/spark-nodes.h
+    src/node-editor/spark-nodes/spark-nodes.h \
+    src/gp3d/helpers/FirstPersonCamera.h \
+    src/gp3d/helpers/Grid.h \
+    src/gp3d/helpers/Events.h \
+    src/gp3d/GPRenderer.h
 
 

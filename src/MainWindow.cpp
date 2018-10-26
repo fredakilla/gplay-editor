@@ -15,6 +15,11 @@
 using QtNodes::DataModelRegistry;
 
 
+#include "gp3d/GPRenderer.h"
+GPRenderer3D* _gpRenderer;
+
+
+
 static std::shared_ptr<DataModelRegistry> registerDataModels()
 {
     auto ret = std::make_shared<DataModelRegistry>();
@@ -90,6 +95,8 @@ MainWindow::MainWindow(QWidget* parent)
     addDockWidget(Qt::TopDockWidgetArea, _dockView);
 
     GPDevice::get().createRenderWindow((void*)_renderView->winId());
+    _gpRenderer = new OpClassNode_Renderer();
+
 
     _nodeScene = new CustomFlowScene(registerDataModels());
     _nodeView = new FlowView(_nodeScene);
@@ -202,10 +209,30 @@ void MainWindow::resizeRenderView(const QSize& size)
     GPDevice::get().resizeRenderView(size.width(), size.height());
 }
 
+
+float m_time = 0;
+
 void MainWindow::timerEvent(QTimerEvent* event)
 {
     QWidget::timerEvent(event);
-    GPDevice::get().frame();
+
+
+
+
+    // compute timestep for manually updating gplay
+    static float lasttime = 0.0f;
+    float step = m_time - lasttime;
+    lasttime = m_time;
+    if(step < 0)
+        step = 0.0f;
+
+
+    GPDevice::get().beginFrame();
+
+    _gpRenderer->update(step);
+    _gpRenderer->render();
+
+    GPDevice::get().endFrame();
 }
 
 void MainWindow::showNode(QtNodes::Node& node)

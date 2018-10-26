@@ -9,6 +9,16 @@ GPDevice* GPDevice::_instance = nullptr;
 
 #include "node-editor/common/BaseNode.h"
 
+#include <imgui/imgui.h>
+
+
+
+
+#include "gp3d/helpers/Events.h"
+
+
+
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 // Debug drawer
@@ -295,10 +305,17 @@ void GPDevice::createRenderWindow(void* hwnd)
 
     //gplay::Renderer::getInstance().toggleDebugStats();
 
+    // create default view
     View::create(0, Rectangle(200, 200), View::ClearFlags::COLOR_DEPTH, 0x556677ff, 1.0f, 0);
 }
 
-void GPDevice::frame()
+void GPDevice::beginFrame()
+{
+    bgfx::touch(0);
+    View::getView(0)->bind();
+}
+
+void GPDevice::endFrame()
 {
     _platform->processEvents();
     _platform->frame();
@@ -309,9 +326,31 @@ void GPDevice::stop()
     _platform->stop();
 }
 
+
+
+void GPDevice::keyEvent(Keyboard::KeyEvent evt, int key)
+{
+    std::shared_ptr<KeyEvent> keyEvent = KeyEvent::create();
+    keyEvent.get()->event = evt;
+    keyEvent.get()->key = key;
+    EventManager::get()->queueEvent(keyEvent);
+}
+
+bool GPDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
+{
+    std::shared_ptr<MouseEvent> mouseEvent = MouseEvent::create();
+    mouseEvent.get()->event = evt;
+    mouseEvent.get()->mousePos = Vector2(x, y);
+    EventManager::get()->queueEvent(mouseEvent);
+    return true;
+}
+
 void GPDevice::resizeRenderView(int width, int height)
 {
+    // resize game engine window
     _platform->setWindowSize(width, height);
+
+    // resize default view
     View::getView(0)->setViewRect(Rectangle(width, height));
 
 
@@ -355,7 +394,15 @@ void GPDevice::update(float elapsedTime)
 
 void GPDevice::render(float elapsedTime)
 {
-    bgfx::touch(0);
+    //bgfx::touch(0);
+
+    static float axis[] = { 0.2f, 0.4f, 0.3f };
+    static float speed = { 0.5f };
+    ImGui::SetNextWindowSize(ImVec2(200,200), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Cube Controls");
+    ImGui::SliderFloat3("Axis", axis, 0.0f, 1.0f);
+    ImGui::SliderFloat("Speed", &speed, -10.0f, 10.0f);
+    ImGui::End();
 
     View::getView(0)->bind();
     _scene->visit(this, &GPDevice::drawScene);
