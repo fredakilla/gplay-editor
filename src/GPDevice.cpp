@@ -144,11 +144,19 @@ void GPDevice::render(float elapsedTime)
 
     static float axis[] = { 0.2f, 0.4f, 0.3f };
     static float speed = { 0.5f };
+    static ImVec4 clear_color = ImColor(114, 144, 154);
     ImGui::SetNextWindowSize(ImVec2(200,200), ImGuiCond_FirstUseEver);
     ImGui::Begin("Cube Controls");
     ImGui::SliderFloat3("Axis", axis, 0.0f, 1.0f);
     ImGui::SliderFloat("Speed", &speed, -10.0f, 10.0f);
+    ImGui::ColorEdit3("clear color", (float*)&clear_color);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
+
+    ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
+    ImGui::ShowTestWindow();
+
+
 
     View::getView(0)->bind();
     _scene->visit(this, &GPDevice::drawScene);

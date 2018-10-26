@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget* parent)
     _dockView->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::TopDockWidgetArea, _dockView);
 
-    GPDevice::get().createRenderWindow((void*)_renderView->winId());
+    GPDevice::get().createRenderWindow((void*)_renderView);
     _gpRenderer = new OpClassNode_Renderer();
 
 

@@ -42,7 +42,7 @@ private:
 
 
     static GPDevice* _instance;
-    gplay::Platform* _platform;
+    Platform* _platform;
     Scene* _scene;
     bool _isShowDebug;  // show debug shapes in effects
 };

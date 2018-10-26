@@ -35,6 +35,7 @@ LIBS += -L$$PWD/3rdparty/nodeeditor/BUILD/lib -lnodes
 # platform specific
 #--------------------------------------------------------------------
 linux: {
+    QT += x11extras
     DEFINES += __linux__
     PRE_TARGETDEPS += $$GPLAY_OUTPUT_DIR/lib/libgplay-deps.a
     PRE_TARGETDEPS += $$GPLAY_OUTPUT_DIR/lib/libgplay.a
@@ -79,7 +80,10 @@ SOURCES += \
     src/RenderViewWidget.cpp \
     src/gp3d/helpers/FirstPersonCamera.cpp \
     src/gp3d/helpers/Grid.cpp \
-    src/gp3d/GPRenderer.cpp
+    src/gp3d/GPRenderer.cpp \
+    src/gp3d/PlatformQt.cpp \
+    src/gp3d/QtImGui.cpp \
+    src/gp3d/ImGuiRenderer.cpp
 
 HEADERS += \
     src/node-editor/common/BaseNode.h \
@@ -107,6 +111,8 @@ HEADERS += \
     src/gp3d/helpers/FirstPersonCamera.h \
     src/gp3d/helpers/Grid.h \
     src/gp3d/helpers/Events.h \
-    src/gp3d/GPRenderer.h
+    src/gp3d/GPRenderer.h \
+    src/gp3d/QtImGui.h \
+    src/gp3d/ImGuiRenderer.h
 
 

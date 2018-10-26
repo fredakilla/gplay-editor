@@ -236,6 +236,7 @@ void RenderViewWidget::resizeEvent(QResizeEvent* event)
 
 void RenderViewWidget::mousePressEvent(QMouseEvent* event)
 {
+#if 0
     QWidget::mousePressEvent(event);
 
     m_lastMousePos = event->pos();
@@ -277,10 +278,12 @@ void RenderViewWidget::mousePressEvent(QMouseEvent* event)
     }
 
     // send event through gplay Event Listener ?
+#endif
 }
 
 void RenderViewWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+#if 0
     QWidget::mouseReleaseEvent(event);
 
     if (event->button() == Qt::RightButton)
@@ -316,10 +319,12 @@ void RenderViewWidget::mouseReleaseEvent(QMouseEvent* event)
 
 
     // send event through gplay Event Listener ?
+#endif
 }
 
 void RenderViewWidget::mouseMoveEvent(QMouseEvent* event)
 {
+#if 0
     if(m_mouseMoveEnabled)
     {
         int dx = event->x() - m_lastMousePos.x();
@@ -340,6 +345,7 @@ void RenderViewWidget::mouseMoveEvent(QMouseEvent* event)
     /*Graphics* graphics = GetSubsystem<Graphics>();
     SDL_Window * win = (SDL_Window*)graphics->GetWindow();
     SDL_WarpMouseInWindow(win,glob.x(),glob.y());*/
+#endif
 }
 
 void RenderViewWidget::wheelEvent(QWheelEvent* event)
