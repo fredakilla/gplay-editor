@@ -122,8 +122,8 @@ void ImGuiRenderer::onMousePressedChange(QMouseEvent *event)
 void ImGuiRenderer::onWheel(QWheelEvent *event)
 {
     // 5 lines per unit
-    g_MouseWheelH += event->pixelDelta().x() / (ImGui::GetTextLineHeight());
-    g_MouseWheel += event->pixelDelta().y() / (5.0 * ImGui::GetTextLineHeight());
+    g_MouseWheelH += event->delta() / (ImGui::GetTextLineHeight());
+    g_MouseWheel += event->delta() / (5.0f * ImGui::GetTextLineHeight());
 }
 
 void ImGuiRenderer::onKeyPressRelease(QKeyEvent *event)
