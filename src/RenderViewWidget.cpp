@@ -1,3 +1,5 @@
+#if 0
+
 #include "RenderViewWidget.h"
 #include <QResizeEvent>
 
@@ -229,12 +231,16 @@ RenderViewWidget::RenderViewWidget(QWidget* parent) :
     __initScancodeKeyMap();
 }
 
+
+
 void RenderViewWidget::resizeEvent(QResizeEvent* event)
 {
-    Q_EMIT(windowResized(event->size()));
+    //Q_EMIT(windowResized(event->size()));
+    //GPDevice::get().resizeRenderView(size.width(), size.height());
 }
 
-#if 0
+
+
 
 void RenderViewWidget::mousePressEvent(QMouseEvent* event)
 {

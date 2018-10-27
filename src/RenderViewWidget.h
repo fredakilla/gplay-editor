@@ -1,3 +1,5 @@
+#if 0
+
 #ifndef RENDERVIEWWIDGET_H
 #define RENDERVIEWWIDGET_H
 
@@ -9,9 +11,9 @@ class RenderViewWidget : public QWidget
 public:
     RenderViewWidget(QWidget* parent = nullptr);
 
-    void resizeEvent(QResizeEvent* event);
 
 #if 0
+    void resizeEvent(QResizeEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
@@ -33,3 +35,5 @@ private:
 };
 
 #endif // RENDERVIEWWIDGET_H
+
+#endif

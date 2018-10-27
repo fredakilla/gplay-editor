@@ -82,7 +82,10 @@ MainWindow::MainWindow(QWidget* parent)
     createMenus();
 
 
-    _renderView = new RenderViewWidget(this);
+    // create widget for gplay engine view
+    _renderView = new QWidget(this);
+    _renderView->setMouseTracking(true);
+    _renderView->setFocusPolicy(Qt::StrongFocus);
 
     _viewportContainer = new QWidget(this);
     _viewportContainer->setLayout(new QVBoxLayout());
@@ -120,7 +123,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(_nodeScene, &FlowScene::nodeDoubleClicked, this, &MainWindow::showNode);
     connect(_nodeScene, &FlowScene::nodeCreated, this, &MainWindow::initNode);
-    connect(_renderView, &RenderViewWidget::windowResized, this, &MainWindow::resizeRenderView);
 
     // connect to FlowView deleteSelectionAction a method to delete comments graphics items.
     QAction* deleteAction = _nodeView->deleteSelectionAction();
@@ -202,11 +204,6 @@ void MainWindow::shutdown()
 {
     killTimer(_gameLoopTimerId);
     GPDevice::get().stop();
-}
-
-void MainWindow::resizeRenderView(const QSize& size)
-{
-    GPDevice::get().resizeRenderView(size.width(), size.height());
 }
 
 

@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QDockWidget>
 
-#include "RenderViewWidget.h"
 #include "node-editor/common/CustomFlowScene.h"
 #include "GraphView.h"
 
@@ -17,7 +16,6 @@ public:
     ~MainWindow();
 
 private Q_SLOTS:
-    void resizeRenderView(const QSize& size);
     void showNode(Node& node);
     void newFile();
     void open();
@@ -39,7 +37,7 @@ private:
     CustomFlowScene* _nodeScene;
     FlowView* _nodeView;
     QWidget* _viewportContainer;
-    RenderViewWidget* _renderView;
+    QWidget* _renderView;
     GraphView* _pathView;
     QDockWidget* _dockView;
     QDockWidget* _dockNodeGraph;

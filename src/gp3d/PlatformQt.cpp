@@ -123,7 +123,7 @@ gplay::Keyboard::Key __convertQtKeyToGplay(Qt::Key qtKey)
     return gplayKey;
 }
 
-
+#include "../GPDevice.h"
 
 //------------------------------------------------------------------------------------------------------
 // GPlayWidgetEventFilter
@@ -136,19 +136,31 @@ bool GPlayWidgetEventFilter::eventFilter(QObject *watched, QEvent *event)
     case QEvent::MouseButtonPress:
         this->onMousePress(static_cast<QMouseEvent*>(event));
         break;
+
     case QEvent::MouseButtonRelease:
         this->onMouseRelease(static_cast<QMouseEvent*>(event));
         break;
+
     case QEvent::MouseMove:
         this->onMouseMove(static_cast<QMouseEvent*>(event));
         break;
+
     case QEvent::Wheel:
         this->onWheel(static_cast<QWheelEvent*>(event));
         break;
+
     case QEvent::KeyPress:
     case QEvent::KeyRelease:
         this->onKeyEvent(static_cast<QKeyEvent*>(event));
         break;
+
+    case QEvent::Resize:
+        {
+            QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
+            GPDevice::get().resizeRenderView(resizeEvent->size().width(), resizeEvent->size().height());
+        }
+        break;
+
     default:
         break;
     }
