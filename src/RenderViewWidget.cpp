@@ -217,9 +217,9 @@ RenderViewWidget::RenderViewWidget(QWidget* parent) :
     //setGeometry(0,0,200,200);
 
     setMouseTracking(true);
-    setAttribute(Qt::WA_PaintOnScreen);
-    setAttribute(Qt::WA_NativeWindow);
-    setUpdatesEnabled(false);
+    ///setAttribute(Qt::WA_PaintOnScreen);
+    ///setAttribute(Qt::WA_NativeWindow);
+    ///setUpdatesEnabled(false);
     setFocusPolicy(Qt::StrongFocus);
 
 
@@ -233,6 +233,8 @@ void RenderViewWidget::resizeEvent(QResizeEvent* event)
 {
     Q_EMIT(windowResized(event->size()));
 }
+
+#if 0
 
 void RenderViewWidget::mousePressEvent(QMouseEvent* event)
 {
@@ -389,7 +391,7 @@ void RenderViewWidget::keyReleaseEvent(QKeyEvent* event)
 }
 
 
-
+#endif
 
 
 

@@ -10,12 +10,15 @@ public:
     RenderViewWidget(QWidget* parent = nullptr);
 
     void resizeEvent(QResizeEvent* event);
+
+#if 0
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
     void wheelEvent(QWheelEvent* event);
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
+#endif
 
 Q_SIGNALS:
     void windowResized(const QSize& size);

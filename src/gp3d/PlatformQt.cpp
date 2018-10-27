@@ -15,12 +15,308 @@
 #include "QtImGui.h"
 
 
+#include "PlatformQt.h"
+#include <QEvent>
+#include <QWheelEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
+
+
+//------------------------------------------------------------------------------------------------------
+// key utilities to convert Qt key to gplay key
+//------------------------------------------------------------------------------------------------------
+static QMap<Qt::Key, gplay::Keyboard::Key> __keymap;
+static void __initKeyMap();
+static gplay::Keyboard::Key __convertQtKeyToGplay(Qt::Key qtKey);
+
+
+//------------------------------------------------------------------------------------------------------
+// map keys Qt/gplay
+//------------------------------------------------------------------------------------------------------
+void __initKeyMap()
+{
+    __keymap[Qt::Key_unknown]     = gplay::Keyboard::KEY_NONE;
+    __keymap[Qt::Key_Escape]        = gplay::Keyboard::KEY_ESCAPE;
+    __keymap[Qt::Key_Tab]           = gplay::Keyboard::KEY_TAB;
+    __keymap[Qt::Key_Backspace]     = gplay::Keyboard::KEY_BACKSPACE;
+    __keymap[Qt::Key_Return]        = gplay::Keyboard::KEY_RETURN;
+    __keymap[Qt::Key_Enter]         = gplay::Keyboard::KEY_KP_ENTER;
+    __keymap[Qt::Key_Insert]        = gplay::Keyboard::KEY_INSERT;
+    __keymap[Qt::Key_Delete]        = gplay::Keyboard::KEY_DELETE;
+    __keymap[Qt::Key_Pause]         = gplay::Keyboard::KEY_PAUSE;
+    __keymap[Qt::Key_Print]         = gplay::Keyboard::KEY_PRINT;
+    __keymap[Qt::Key_SysReq]        = gplay::Keyboard::KEY_SYSREQ;
+    __keymap[Qt::Key_Home]          = gplay::Keyboard::KEY_HOME;
+    __keymap[Qt::Key_End]           = gplay::Keyboard::KEY_END;
+    __keymap[Qt::Key_Left]          = gplay::Keyboard::KEY_LEFT_ARROW;
+    __keymap[Qt::Key_Right]         = gplay::Keyboard::KEY_RIGHT_ARROW;
+    __keymap[Qt::Key_Up]            = gplay::Keyboard::KEY_UP_ARROW;
+    __keymap[Qt::Key_Down]          = gplay::Keyboard::KEY_DOWN_ARROW;
+    __keymap[Qt::Key_PageUp]        = gplay::Keyboard::KEY_PG_UP;
+    __keymap[Qt::Key_PageDown]      = gplay::Keyboard::KEY_PG_DOWN;
+    __keymap[Qt::Key_Shift]         = gplay::Keyboard::KEY_SHIFT;
+    __keymap[Qt::Key_Control]       = gplay::Keyboard::KEY_CTRL;
+    __keymap[Qt::Key_Alt]           = gplay::Keyboard::KEY_ALT;
+    __keymap[Qt::Key_CapsLock]      = gplay::Keyboard::KEY_CAPS_LOCK;
+    __keymap[Qt::Key_NumLock]       = gplay::Keyboard::KEY_NUM_LOCK;
+    __keymap[Qt::Key_ScrollLock]    = gplay::Keyboard::KEY_SCROLL_LOCK;
+    __keymap[Qt::Key_F1]            = gplay::Keyboard::KEY_F1;
+    __keymap[Qt::Key_F2]            = gplay::Keyboard::KEY_F2;
+    __keymap[Qt::Key_F3]            = gplay::Keyboard::KEY_F3;
+    __keymap[Qt::Key_F4]            = gplay::Keyboard::KEY_F4;
+    __keymap[Qt::Key_F5]            = gplay::Keyboard::KEY_F5;
+    __keymap[Qt::Key_F6]            = gplay::Keyboard::KEY_F6;
+    __keymap[Qt::Key_F7]            = gplay::Keyboard::KEY_F7;
+    __keymap[Qt::Key_F8]            = gplay::Keyboard::KEY_F8;
+    __keymap[Qt::Key_F9]            = gplay::Keyboard::KEY_F9;
+    __keymap[Qt::Key_F10]           = gplay::Keyboard::KEY_F10;
+    __keymap[Qt::Key_F11]           = gplay::Keyboard::KEY_F11;
+    __keymap[Qt::Key_F12]           = gplay::Keyboard::KEY_F12;
+    __keymap[Qt::Key_Menu]          = gplay::Keyboard::KEY_MENU;
+
+    __keymap[Qt::Key_A]             = gplay::Keyboard::KEY_A;
+    __keymap[Qt::Key_B]             = gplay::Keyboard::KEY_B;
+    __keymap[Qt::Key_C]             = gplay::Keyboard::KEY_C;
+    __keymap[Qt::Key_D]             = gplay::Keyboard::KEY_D;
+    __keymap[Qt::Key_E]             = gplay::Keyboard::KEY_E;
+    __keymap[Qt::Key_F]             = gplay::Keyboard::KEY_F;
+    __keymap[Qt::Key_G]             = gplay::Keyboard::KEY_G;
+    __keymap[Qt::Key_H]             = gplay::Keyboard::KEY_H;
+    __keymap[Qt::Key_I]             = gplay::Keyboard::KEY_I;
+    __keymap[Qt::Key_J]             = gplay::Keyboard::KEY_J;
+    __keymap[Qt::Key_K]             = gplay::Keyboard::KEY_K;
+    __keymap[Qt::Key_L]             = gplay::Keyboard::KEY_L;
+    __keymap[Qt::Key_M]             = gplay::Keyboard::KEY_M;
+    __keymap[Qt::Key_N]             = gplay::Keyboard::KEY_N;
+    __keymap[Qt::Key_O]             = gplay::Keyboard::KEY_O;
+    __keymap[Qt::Key_P]             = gplay::Keyboard::KEY_P;
+    __keymap[Qt::Key_Q]             = gplay::Keyboard::KEY_Q;
+    __keymap[Qt::Key_R]             = gplay::Keyboard::KEY_R;
+    __keymap[Qt::Key_S]             = gplay::Keyboard::KEY_S;
+    __keymap[Qt::Key_T]             = gplay::Keyboard::KEY_T;
+    __keymap[Qt::Key_U]             = gplay::Keyboard::KEY_U;
+    __keymap[Qt::Key_V]             = gplay::Keyboard::KEY_V;
+    __keymap[Qt::Key_W]             = gplay::Keyboard::KEY_W;
+    __keymap[Qt::Key_X]             = gplay::Keyboard::KEY_X;
+    __keymap[Qt::Key_Y]             = gplay::Keyboard::KEY_Y;
+    __keymap[Qt::Key_Z]             = gplay::Keyboard::KEY_Z;
+
+    __keymap[Qt::Key_0]             = gplay::Keyboard::KEY_ZERO;
+    __keymap[Qt::Key_1]             = gplay::Keyboard::KEY_ONE;
+    __keymap[Qt::Key_2]             = gplay::Keyboard::KEY_TWO;
+    __keymap[Qt::Key_3]             = gplay::Keyboard::KEY_THREE;
+    __keymap[Qt::Key_4]             = gplay::Keyboard::KEY_FOUR;
+    __keymap[Qt::Key_5]             = gplay::Keyboard::KEY_FIVE;
+    __keymap[Qt::Key_6]             = gplay::Keyboard::KEY_SIX;
+    __keymap[Qt::Key_7]             = gplay::Keyboard::KEY_SEVEN;
+    __keymap[Qt::Key_8]             = gplay::Keyboard::KEY_EIGHT;
+    __keymap[Qt::Key_9]             = gplay::Keyboard::KEY_NINE;
+}
+
+gplay::Keyboard::Key __convertQtKeyToGplay(Qt::Key qtKey)
+{
+    gplay::Keyboard::Key gplayKey = __keymap.value(Qt::Key(qtKey));
+
+    if(gplayKey == 0)
+        gplay::print("Warning: Key %d not mapped", qtKey);
+
+    return gplayKey;
+}
+
+
+
+//------------------------------------------------------------------------------------------------------
+// GPlayWidgetEventFilter
+//------------------------------------------------------------------------------------------------------
+
+bool GPlayWidgetEventFilter::eventFilter(QObject *watched, QEvent *event)
+{
+    switch (event->type())
+    {
+    case QEvent::MouseButtonPress:
+        this->onMousePress(static_cast<QMouseEvent*>(event));
+        break;
+    case QEvent::MouseButtonRelease:
+        this->onMouseRelease(static_cast<QMouseEvent*>(event));
+        break;
+    case QEvent::MouseMove:
+        this->onMouseMove(static_cast<QMouseEvent*>(event));
+        break;
+    case QEvent::Wheel:
+        this->onWheel(static_cast<QWheelEvent*>(event));
+        break;
+    case QEvent::KeyPress:
+    case QEvent::KeyRelease:
+        this->onKeyEvent(static_cast<QKeyEvent*>(event));
+        break;
+    default:
+        break;
+    }
+    return QObject::eventFilter(watched, event);
+}
+
+void GPlayWidgetEventFilter::onWheel(QWheelEvent* event)
+{
+    if(ImGui::GetIO().WantCaptureMouse)
+        return;
+
+    int wheelDelta = event->delta()/120;
+    gplay::Platform::mouseEventInternal(gplay::Mouse::MOUSE_WHEEL, 0, 0, wheelDelta);
+}
+
+void GPlayWidgetEventFilter::onMousePress(QMouseEvent* event)
+{
+    if(ImGui::GetIO().WantCaptureMouse)
+        return;
+
+    gplay::Mouse::MouseEvent mouseEvt;
+    switch (event->button())
+    {
+    case Qt::LeftButton:
+        mouseEvt = gplay::Mouse::MOUSE_PRESS_LEFT_BUTTON;
+        break;
+    case Qt::RightButton:
+        mouseEvt = gplay::Mouse::MOUSE_PRESS_RIGHT_BUTTON;
+        break;
+    case Qt::MidButton:
+        mouseEvt = gplay::Mouse::MOUSE_PRESS_MIDDLE_BUTTON;
+        break;
+    default:
+        break;
+    }
+
+    int xMousePos = event->x();
+    int yMmousePos = event->y();
+
+    if (!gplay::Platform::mouseEventInternal(mouseEvt, xMousePos, yMmousePos, 0))
+    {
+        gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_PRESS, xMousePos, yMmousePos, 0, true);
+    }//------------------------------------------------------------------------------------------------------
+    // GPlayWidgetEventFilter
+    //------------------------------------------------------------------------------------------------------
+}
+
+void GPlayWidgetEventFilter::onMouseRelease(QMouseEvent* event)
+{
+    if(ImGui::GetIO().WantCaptureMouse)
+        return;
+
+    gplay::Mouse::MouseEvent mouseEvt;
+    switch (event->button())
+    {
+    case Qt::LeftButton:
+        mouseEvt = gplay::Mouse::MOUSE_RELEASE_LEFT_BUTTON;
+        break;
+    case Qt::RightButton:
+        mouseEvt = gplay::Mouse::MOUSE_RELEASE_RIGHT_BUTTON;
+        break;
+    case Qt::MidButton:
+        mouseEvt = gplay::Mouse::MOUSE_RELEASE_MIDDLE_BUTTON;
+        break;
+    default:
+        break;
+    }
+
+    int xMousePos = event->x();
+    int yMmousePos = event->y();
+
+    if (!gplay::Platform::mouseEventInternal(mouseEvt, xMousePos, yMmousePos, 0))
+    {
+        gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_RELEASE, xMousePos, yMmousePos, 0, true);
+    }
+}
+
+void GPlayWidgetEventFilter::onMouseMove(QMouseEvent* event)
+{
+    if(ImGui::GetIO().WantCaptureMouse)
+        return;
+
+    int x = event->x();
+    int y = event->y();
+
+    /*if (__mouseCaptured)
+    {
+        if (x == __mouseCapturePointX && y == __mouseCapturePointY)
+        {
+            // Discard the first MotionNotify following capture since it contains bogus x,y data.
+            break;
+        }
+
+        // Convert to deltas
+        x -= __mouseCapturePointX;
+        y -= __mouseCapturePointY;
+
+        // Warp mouse back to center of screen.
+        SDL_WarpMouseInWindow(__window, __mouseCapturePointX, __mouseCapturePointY);
+    }*/
+
+    if (!gplay::Platform::mouseEventInternal(gplay::Mouse::MOUSE_MOVE, x, y, 0))
+    {
+        if (event->button() == Qt::LeftButton)
+        {
+            gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_MOVE, x, y, 0, true);
+        }
+    }
+}
+
+void GPlayWidgetEventFilter::onKeyEvent(QKeyEvent* event)
+{
+    if(ImGui::GetIO().WantTextInput)
+        return;
+
+    int key = __convertQtKeyToGplay( Qt::Key(event->key()) );
+    gplay::Keyboard::KeyEvent keyEventType;
+
+    switch (event->type())
+    {
+    case QKeyEvent::KeyPress:
+        keyEventType = gplay::Keyboard::KeyEvent::KEY_PRESS;
+        break;
+    case QKeyEvent::KeyRelease:
+        keyEventType = gplay::Keyboard::KeyEvent::KEY_RELEASE;
+        break;
+    default:
+        Q_ASSERT(0);
+        break;
+    }
+    gplay::Platform::keyEventInternal(keyEventType, key);
+
+
+    // special mapping for F1, F2, F7
+    if(event->type() == QKeyEvent::KeyPress)
+    {
+        switch (key)
+        {
+        case gplay::Keyboard::KEY_F1:
+            gplay::Renderer::getInstance().toggleDebugStats();
+            break;
+        case gplay::Keyboard::KEY_F3:
+            gplay::Renderer::getInstance().toggleWireFrame();
+            break;
+        case  gplay::Keyboard::KEY_F7:
+            gplay::Renderer::getInstance().toggleVSync();
+            break;
+        }
+    }
+}
+
+
+
+
+
+
+
+//-------------------------------------------------------------------------------------------------------------
+// Custom gplay Platform implementation using Qt
+//-------------------------------------------------------------------------------------------------------------
+
 namespace gplay {
 
 int __app_argc = 0;
 char** __app_argv = nullptr;
 
 static QWidget* __widget;
+static GPlayWidgetEventFilter __widgetEventFilter;
 
 // timer
 static double __timeAbsolute;
@@ -44,15 +340,13 @@ void updateWindowSize()
 }
 
 
-//-------------------------------------------------------------------------------------------------------------
-// Platform Qt impl
-//-------------------------------------------------------------------------------------------------------------
-
 Platform::Platform(Game* game) :
     _game(game)
 {
     Q_ASSERT(__app_argc);
     Q_ASSERT(__app_argv);
+
+    __initKeyMap();
 }
 
 Platform::~Platform()
@@ -103,6 +397,8 @@ Platform* Platform::create(Game* game, void* externalWindow)
     // Create ImGui context and init
     QtImGui::initialize(renderWidget);
 
+    renderWidget->installEventFilter(&__widgetEventFilter);
+
 
     return platform;
 }
@@ -138,165 +434,8 @@ void Platform::frame()
 }
 
 int Platform::processEvents()
-{/*
-    SDL_Event evt;
-
-    while (SDL_PollEvent(&evt))
-    {
-        // Process ImGui events
-        ImGui_ImplSdlGL3_ProcessEvent(&evt);
-
-        // Process SDL2 events
-        switch (evt.type)
-        {
-            case SDL_QUIT:
-            {
-                _game->exit();
-                return 0;
-            }
-            break;
-
-            case SDL_MOUSEWHEEL:
-            {
-                if(ImGui::GetIO().WantCaptureMouse)
-                    continue;
-
-                const SDL_MouseWheelEvent& wheelEvent = evt.wheel;
-                int wheelDelta = wheelEvent.y;
-                gplay::Platform::mouseEventInternal(gplay::Mouse::MOUSE_WHEEL, 0, 0, wheelDelta);
-            }
-            break;
-
-            case SDL_MOUSEBUTTONDOWN:
-            {
-                if(ImGui::GetIO().WantCaptureMouse)
-                    continue;
-
-                gplay::Mouse::MouseEvent mouseEvt;
-                const SDL_MouseButtonEvent& sdlMouseEvent = evt.button;
-
-                switch (sdlMouseEvent.button)
-                {
-                case SDL_BUTTON_LEFT:
-                    mouseEvt = gplay::Mouse::MOUSE_PRESS_LEFT_BUTTON;
-                    break;
-                case SDL_BUTTON_RIGHT:
-                    mouseEvt = gplay::Mouse::MOUSE_PRESS_RIGHT_BUTTON;
-                    break;
-                case SDL_BUTTON_MIDDLE:
-                    mouseEvt = gplay::Mouse::MOUSE_PRESS_MIDDLE_BUTTON;
-                    break;
-                }
-
-                if (!gplay::Platform::mouseEventInternal(mouseEvt, sdlMouseEvent.x, sdlMouseEvent.y, 0))
-                {
-                    gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_PRESS, sdlMouseEvent.x, sdlMouseEvent.y, 0, true);
-                }
-            }
-            break;
-
-            case SDL_MOUSEBUTTONUP:
-            {
-                if(ImGui::GetIO().WantCaptureMouse)
-                    continue;
-
-                gplay::Mouse::MouseEvent mouseEvt;
-                const SDL_MouseButtonEvent& sdlMouseEvent = evt.button;
-
-                switch (sdlMouseEvent.button)
-                {
-                case SDL_BUTTON_LEFT:
-                    mouseEvt = gplay::Mouse::MOUSE_RELEASE_LEFT_BUTTON;
-                    break;
-                case SDL_BUTTON_RIGHT:
-                    mouseEvt = gplay::Mouse::MOUSE_RELEASE_RIGHT_BUTTON;
-                    break;
-                case SDL_BUTTON_MIDDLE:
-                    mouseEvt = gplay::Mouse::MOUSE_RELEASE_MIDDLE_BUTTON;
-                    break;
-                }
-
-                if (!gplay::Platform::mouseEventInternal(mouseEvt, sdlMouseEvent.x, sdlMouseEvent.y, 0))
-                {
-                    gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_RELEASE, sdlMouseEvent.x, sdlMouseEvent.y, 0, true);
-                }
-            }
-            break;
-
-            case SDL_MOUSEMOTION:
-            {
-                if(ImGui::GetIO().WantCaptureMouse)
-                    continue;
-
-                const SDL_MouseMotionEvent& motionEvt = evt.motion;
-
-                int x = motionEvt.x;
-                int y = motionEvt.y;
-                if (__mouseCaptured)
-                {
-                    if (x == __mouseCapturePointX && y == __mouseCapturePointY)
-                    {
-                        // Discard the first MotionNotify following capture since it contains bogus x,y data.
-                        break;
-                    }
-
-                    // Convert to deltas
-                    x -= __mouseCapturePointX;
-                    y -= __mouseCapturePointY;
-
-                    // Warp mouse back to center of screen.
-                    SDL_WarpMouseInWindow(__window, __mouseCapturePointX, __mouseCapturePointY);
-                }
-
-                if (!gplay::Platform::mouseEventInternal(gplay::Mouse::MOUSE_MOVE, x, y, 0))
-                {
-                    //if (evt.xmotion.state & Button1Mask)
-                    if (evt.button.button == SDL_BUTTON_LEFT)
-                    {
-                        gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_MOVE, x, y, 0, true);
-                    }
-                }
-            }
-            break;
-
-
-            case SDL_KEYDOWN:
-            {
-                if(!ImGui::GetIO().WantTextInput)
-                {
-                    const SDL_KeyboardEvent& keyEvent = evt.key;
-                    Keyboard::Key key = translateKey(keyEvent.keysym.scancode);
-                    gplay::Platform::keyEventInternal(gplay::Keyboard::KEY_PRESS, key);
-
-                    switch (key)
-                    {
-                    case Keyboard::KEY_F1:
-                        Renderer::getInstance().toggleDebugStats();
-                        break;
-                    case Keyboard::KEY_F3:
-                        Renderer::getInstance().toggleWireFrame();
-                        break;
-                    case Keyboard::KEY_F7:
-                        Renderer::getInstance().toggleVSync();
-                        break;
-                    }
-                }
-            }
-            break;
-
-            case SDL_KEYUP:
-            {
-                if(!ImGui::GetIO().WantTextInput)
-                {
-                    const SDL_KeyboardEvent& keyEvent = evt.key;
-                    Keyboard::Key key = translateKey(keyEvent.keysym.scancode);
-                    gplay::Platform::keyEventInternal(gplay::Keyboard::KEY_RELEASE, key);
-                }
-            }
-            break;
-        }
-    }*/
-
+{
+    // see GPlayWidgetEventFilter
     return 1;
 }
 

@@ -113,6 +113,7 @@ HEADERS += \
     src/gp3d/helpers/Events.h \
     src/gp3d/GPRenderer.h \
     src/gp3d/QtImGui.h \
-    src/gp3d/ImGuiRenderer.h
+    src/gp3d/ImGuiRenderer.h \
+    src/gp3d/PlatformQt.h
 
 
