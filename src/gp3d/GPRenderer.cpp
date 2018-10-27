@@ -38,7 +38,9 @@ void GPRenderer3D::update(float timestep)
 {
     // get real game frame time, because timestep is relative to editor timeline
     float frameTime = Game::getInstance()->getFrameTime();
-    _fpCamera.updateCamera(frameTime);
+
+    if(Game::getInstance()->isMouseCaptured())
+        _fpCamera.updateCamera(frameTime);
 }
 
 void GPRenderer3D::onMouseEvent(EventDataRef eventData)
@@ -46,13 +48,18 @@ void GPRenderer3D::onMouseEvent(EventDataRef eventData)
     auto mouseEvent = std::dynamic_pointer_cast<MouseEvent>(eventData);
     if(!mouseEvent)
         return;
-    _fpCamera.touchEvent(Touch::TOUCH_MOVE, mouseEvent->mousePos.x, mouseEvent->mousePos.y, 0);
+
+    if(Game::getInstance()->isMouseCaptured())
+        _fpCamera.touchEvent(Touch::TOUCH_MOVE, mouseEvent->mousePos.x, mouseEvent->mousePos.y, 0);
 }
+
 
 void GPRenderer3D::onKeyEvent(EventDataRef eventData)
 {
     auto keyEvent = std::dynamic_pointer_cast<KeyEvent>(eventData);
     if(!keyEvent)
         return;
-    _fpCamera.keyEvent(keyEvent->event, keyEvent->key);
+
+    if(Game::getInstance()->isMouseCaptured())
+        _fpCamera.keyEvent(keyEvent->event, keyEvent->key);
 }

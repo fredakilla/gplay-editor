@@ -11,8 +11,10 @@
 #include <QDebug>
 #include <QThread>
 #include <QWidget>
+#include <QApplication>
 
 #include "QtImGui.h"
+#include "../GPDevice.h"
 
 
 #include "PlatformQt.h"
@@ -20,6 +22,30 @@
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <QKeyEvent>
+
+
+//------------------------------------------------------------------------------------------------------
+// static var used here
+//------------------------------------------------------------------------------------------------------
+
+int __app_argc = 0;
+char** __app_argv = nullptr;
+
+static QWidget* __widget;
+static GPlayWidgetEventFilter __widgetEventFilter;
+
+// timer
+static double __timeAbsolute;
+static std::chrono::time_point<std::chrono::high_resolution_clock> __timeStart;
+
+// mouse input
+static bool __mouseCaptured = false;
+static float __mouseCapturePointX = 0;
+static float __mouseCapturePointY = 0;
+static bool __cursorVisible = true;
+static QPoint __mouseCapturePoint;
+
+
 
 
 //------------------------------------------------------------------------------------------------------
@@ -123,7 +149,7 @@ gplay::Keyboard::Key __convertQtKeyToGplay(Qt::Key qtKey)
     return gplayKey;
 }
 
-#include "../GPDevice.h"
+
 
 //------------------------------------------------------------------------------------------------------
 // GPlayWidgetEventFilter
@@ -203,9 +229,7 @@ void GPlayWidgetEventFilter::onMousePress(QMouseEvent* event)
     if (!gplay::Platform::mouseEventInternal(mouseEvt, xMousePos, yMmousePos, 0))
     {
         gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_PRESS, xMousePos, yMmousePos, 0, true);
-    }//------------------------------------------------------------------------------------------------------
-    // GPlayWidgetEventFilter
-    //------------------------------------------------------------------------------------------------------
+    }
 }
 
 void GPlayWidgetEventFilter::onMouseRelease(QMouseEvent* event)
@@ -246,25 +270,17 @@ void GPlayWidgetEventFilter::onMouseMove(QMouseEvent* event)
     int x = event->x();
     int y = event->y();
 
-    /*if (__mouseCaptured)
+    if (__mouseCaptured)
     {
-        if (x == __mouseCapturePointX && y == __mouseCapturePointY)
-        {
-            // Discard the first MotionNotify following capture since it contains bogus x,y data.
-            break;
-        }
-
         // Convert to deltas
-        x -= __mouseCapturePointX;
-        y -= __mouseCapturePointY;
+        x -= __mouseCapturePoint.x();
+        y -= __mouseCapturePoint.y();
+        //QCursor::setPos(__mouseCapturePoint);
+    }
 
-        // Warp mouse back to center of screen.
-        SDL_WarpMouseInWindow(__window, __mouseCapturePointX, __mouseCapturePointY);
-    }*/
-
-    if (!gplay::Platform::mouseEventInternal(gplay::Mouse::MOUSE_MOVE, x, y, 0))
+   if (!gplay::Platform::mouseEventInternal(gplay::Mouse::MOUSE_MOVE, x, y, 0))
     {
-        if (event->button() == Qt::LeftButton)
+        if (event->button() == Qt::RightButton)
         {
             gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_MOVE, x, y, 0, true);
         }
@@ -314,31 +330,11 @@ void GPlayWidgetEventFilter::onKeyEvent(QKeyEvent* event)
 
 
 
-
-
-
-
 //-------------------------------------------------------------------------------------------------------------
 // Custom gplay Platform implementation using Qt
 //-------------------------------------------------------------------------------------------------------------
 
 namespace gplay {
-
-int __app_argc = 0;
-char** __app_argv = nullptr;
-
-static QWidget* __widget;
-static GPlayWidgetEventFilter __widgetEventFilter;
-
-// timer
-static double __timeAbsolute;
-static std::chrono::time_point<std::chrono::high_resolution_clock> __timeStart;
-
-// mouse input
-static bool __mouseCaptured = false;
-static float __mouseCapturePointX = 0;
-static float __mouseCapturePointY = 0;
-static bool __cursorVisible = true;
 
 
 void updateWindowSize()
@@ -531,27 +527,37 @@ bool Platform::hasMouse()
 }
 
 void Platform::setMouseCaptured(bool captured)
-{/*
+{
     if (captured != __mouseCaptured)
     {
         if (captured)
         {
             // Hide the cursor and warp it to the center of the screen
-            __mouseCapturePointX = getDisplayWidth() / 2;
-            __mouseCapturePointY = getDisplayHeight() / 2;
+            //__mouseCapturePointX = getDisplayWidth() / 2.0f;
+            //__mouseCapturePointY = getDisplayHeight() / 2.0f;
 
-            setCursorVisible(false);
-            SDL_CaptureMouse(SDL_TRUE);
+            __widget->grabMouse();
+
+            //QPoint glob = __widget->mapToGlobal(QPoint(getDisplayWidth()/2,getDisplayHeight()/2));
+            //QCursor::setPos(glob);
+
+
+            __mouseCapturePoint = QCursor::pos();
+
+            //QPoint glob = __widget->mapToGlobal(QPoint(__mouseCapturePointX, __mouseCapturePointY));
+            //QCursor::setPos(glob);
+
+            //setCursorVisible(false);
         }
         else
         {
             // Restore cursor
-            setCursorVisible(true);
-            SDL_CaptureMouse(SDL_FALSE);
+            __widget->releaseMouse();
+            //setCursorVisible(true);
         }
 
         __mouseCaptured = captured;
-    }*/
+    }
 }
 
 bool Platform::isMouseCaptured()
@@ -560,20 +566,24 @@ bool Platform::isMouseCaptured()
 }
 
 void Platform::setCursorVisible(bool visible)
-{/*
+{
     if (visible != __cursorVisible)
     {
         if (visible==false)
         {
-            SDL_ShowCursor(false);
+            QCursor cursor(Qt::BlankCursor);
+            QApplication::setOverrideCursor(cursor);
+            QApplication::changeOverrideCursor(cursor);
         }
         else
         {
-            SDL_ShowCursor(true);
+            QCursor cursor(Qt::ArrowCursor);
+            QApplication::setOverrideCursor(cursor);
+            QApplication::changeOverrideCursor(cursor);
         }
 
         __cursorVisible = visible;
-    }*/
+    }
 }
 
 bool Platform::isCursorVisible()

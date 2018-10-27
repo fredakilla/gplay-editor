@@ -91,7 +91,26 @@ bool GPDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
     mouseEvent.get()->event = evt;
     mouseEvent.get()->mousePos = Vector2(x, y);
     EventManager::getInstance()->queueEvent(mouseEvent);
-    return true;
+
+    switch (evt)
+    {
+    case Mouse::MOUSE_MOVE:
+        return true;
+    case Mouse::MOUSE_PRESS_LEFT_BUTTON:
+        return true;
+    case Mouse::MOUSE_RELEASE_LEFT_BUTTON:
+        return true;
+    case Mouse::MOUSE_PRESS_RIGHT_BUTTON:
+        setMouseCaptured(true);
+        return true;
+    case Mouse::MOUSE_RELEASE_RIGHT_BUTTON:
+        setMouseCaptured(false);
+        return true;
+    default:
+        return false;
+    }
+
+    return false;
 }
 
 void GPDevice::resizeRenderView(int width, int height)
@@ -153,8 +172,8 @@ void GPDevice::render(float elapsedTime)
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
 
-    ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-    ImGui::ShowTestWindow();
+    //ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
+    //ImGui::ShowTestWindow();
 
 
 
