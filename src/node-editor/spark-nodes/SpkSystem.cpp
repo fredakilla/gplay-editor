@@ -4,7 +4,7 @@
 #include <sparkparticles/SparkParticleEmitter.h>
 
 #include "SpkSystem.h"
-#include "../../GPDevice.h"
+#include "../../GplayDevice.h"
 
 #include <QEvent>
 #include <QKeyEvent>

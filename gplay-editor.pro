@@ -73,7 +73,6 @@ SOURCES += \
     src/node-editor/spark-nodes/SpkModifiers.cpp \
     src/node-editor/spark-nodes/SpkSystem.cpp \
     src/node-editor/spark-nodes/SpkZones.cpp \
-    src/GPDevice.cpp \
     src/GraphView.cpp \
     src/main.cpp \
     src/MainWindow.cpp \
@@ -82,7 +81,7 @@ SOURCES += \
     src/gp3d/GPRenderer.cpp \
     src/gp3d/PlatformQt.cpp \
     src/gp3d/QtImGui.cpp \
-    src/gp3d/ImGuiRenderer.cpp
+    src/GplayDevice.cpp
 
 HEADERS += \
     src/node-editor/common/BaseNode.h \
@@ -102,7 +101,6 @@ HEADERS += \
     src/node-editor/spark-nodes/SpkSystem.h \
     src/node-editor/spark-nodes/SpkZones.h \
     src/benchmark.h \
-    src/GPDevice.h \
     src/GraphView.h \
     src/MainWindow.h \
     src/node-editor/spark-nodes/spark-nodes.h \
@@ -111,7 +109,7 @@ HEADERS += \
     src/gp3d/helpers/Events.h \
     src/gp3d/GPRenderer.h \
     src/gp3d/QtImGui.h \
-    src/gp3d/ImGuiRenderer.h \
-    src/gp3d/PlatformQt.h
+    src/gp3d/PlatformQt.h \
+    src/GplayDevice.h
 
 

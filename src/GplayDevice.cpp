@@ -1,4 +1,4 @@
-#include "GPDevice.h"
+#include "GplayDevice.h"
 
 #include <spark/SPARK.h>
 #include <sparkparticles/SparkParticleEmitter.h>

@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include "GPDevice.h"
+#include "GplayDevice.h"
 
 #include <QMessageBox>
 #include <QCloseEvent>

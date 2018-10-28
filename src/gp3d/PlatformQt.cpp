@@ -14,7 +14,7 @@
 #include <QApplication>
 
 #include "QtImGui.h"
-#include "../GPDevice.h"
+#include "../GplayDevice.h"
 
 
 #include "PlatformQt.h"
