@@ -95,6 +95,33 @@ void FirstPersonCamera::rotate(float yaw, float pitch)
     _pitchNode->rotateX(pitch);
 }
 
+bool FirstPersonCamera::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
+{
+    switch (evt)
+    {
+    case Mouse::MOUSE_WHEEL:
+        moveForward(wheelDelta * MOVE_SPEED / 2.0f );
+        return true;
+
+    case Mouse::MOUSE_PRESS_RIGHT_BUTTON:
+        touchEvent(Touch::TOUCH_PRESS,x,y,0);
+        return true;
+
+    case Mouse::MOUSE_RELEASE_RIGHT_BUTTON:
+        touchEvent(Touch::TOUCH_RELEASE,x,y,0);
+        return true;
+
+    case Mouse::MOUSE_MOVE:
+        touchEvent(Touch::TOUCH_MOVE,x,y,0);
+        return true;
+
+    default:
+        return false;
+    }
+    return false;
+}
+
+
 void FirstPersonCamera::touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int contactIndex)
 {
     switch (evt)
@@ -123,6 +150,11 @@ void FirstPersonCamera::touchEvent(Touch::TouchEvent evt, int x, int y, unsigned
         break;
     }
     };
+}
+
+void FirstPersonCamera::clearMoveFlag()
+{
+    _moveFlags = 0;
 }
 
 void FirstPersonCamera::updateCamera(float elapsedTime)
@@ -248,16 +280,7 @@ void FirstPersonCamera::keyEvent(Keyboard::KeyEvent evt, int key)
     }
 }
 
-bool FirstPersonCamera::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
-{
-    switch (evt)
-    {
-    case Mouse::MOUSE_WHEEL:
-        moveForward(wheelDelta * MOVE_SPEED / 2.0f );
-        return true;
-    }
-    return false;
-}
+
 
 }
 

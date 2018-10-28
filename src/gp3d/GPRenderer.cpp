@@ -50,7 +50,12 @@ void GPRenderer3D::onMouseEvent(EventDataRef eventData)
         return;
 
     if(Game::getInstance()->isMouseCaptured())
-        _fpCamera.touchEvent(Touch::TOUCH_MOVE, mouseEvent->mousePos.x, mouseEvent->mousePos.y, 0);
+        _fpCamera.mouseEvent(mouseEvent->event, mouseEvent->mousePos.x, mouseEvent->mousePos.y, 0);
+    else
+    {
+        // force to clear camera movement if key press event was not sent before releasing mouse capture
+        _fpCamera.clearMoveFlag();
+    }
 }
 
 

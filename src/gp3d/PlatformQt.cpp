@@ -43,7 +43,7 @@ static bool __mouseCaptured = false;
 static float __mouseCapturePointX = 0;
 static float __mouseCapturePointY = 0;
 static bool __cursorVisible = true;
-static QPoint __mouseCapturePoint;
+static QPoint __mouseCapturePoint = QPoint(0,0);
 
 
 
@@ -223,8 +223,8 @@ void GPlayWidgetEventFilter::onMousePress(QMouseEvent* event)
         break;
     }
 
-    int xMousePos = event->x();
-    int yMmousePos = event->y();
+    int xMousePos = event->pos().x();
+    int yMmousePos = event->pos().y();
 
     if (!gplay::Platform::mouseEventInternal(mouseEvt, xMousePos, yMmousePos, 0))
     {
@@ -253,8 +253,8 @@ void GPlayWidgetEventFilter::onMouseRelease(QMouseEvent* event)
         break;
     }
 
-    int xMousePos = event->x();
-    int yMmousePos = event->y();
+    int xMousePos = event->pos().x();
+    int yMmousePos = event->pos().y();
 
     if (!gplay::Platform::mouseEventInternal(mouseEvt, xMousePos, yMmousePos, 0))
     {
@@ -267,20 +267,27 @@ void GPlayWidgetEventFilter::onMouseMove(QMouseEvent* event)
     if(ImGui::GetIO().WantCaptureMouse)
         return;
 
-    int x = event->x();
-    int y = event->y();
+    int x = event->pos().x();
+    int y = event->pos().y();
 
     if (__mouseCaptured)
     {
-        // Convert to deltas
+        /*// Convert to deltas
         x -= __mouseCapturePoint.x();
         y -= __mouseCapturePoint.y();
-        //QCursor::setPos(__mouseCapturePoint);
+
+        __mouseCapturePoint = event->pos();
+
+        // center mouse
+        int x = __widget->width() / 2.0f;
+        int y = __widget->height() / 2.0f;
+        QPoint center(x,y);
+        QCursor::setPos(__widget->mapToGlobal((center)));*/
     }
 
-   if (!gplay::Platform::mouseEventInternal(gplay::Mouse::MOUSE_MOVE, x, y, 0))
+    if (!gplay::Platform::mouseEventInternal(gplay::Mouse::MOUSE_MOVE, x, y, 0))
     {
-        if (event->button() == Qt::RightButton)
+        if (event->button() == Qt::LeftButton)
         {
             gplay::Platform::touchEventInternal(gplay::Touch::TOUCH_MOVE, x, y, 0, true);
         }
@@ -536,24 +543,27 @@ void Platform::setMouseCaptured(bool captured)
             //__mouseCapturePointX = getDisplayWidth() / 2.0f;
             //__mouseCapturePointY = getDisplayHeight() / 2.0f;
 
-            __widget->grabMouse();
-
-            //QPoint glob = __widget->mapToGlobal(QPoint(getDisplayWidth()/2,getDisplayHeight()/2));
-            //QCursor::setPos(glob);
-
-
             __mouseCapturePoint = QCursor::pos();
 
-            //QPoint glob = __widget->mapToGlobal(QPoint(__mouseCapturePointX, __mouseCapturePointY));
-            //QCursor::setPos(glob);
+            __widget->grabMouse();
+            setCursorVisible(false);
 
-            //setCursorVisible(false);
+            /*int x = __widget->width() / 2.0f;
+            int y = __widget->height() / 2.0f;
+            QPoint center(x,y);
+            QCursor::setPos(__widget->mapToGlobal((center)));*/
         }
         else
         {
+            // recenter cursor
+            int x = __widget->width() / 2.0f;
+            int y = __widget->height() / 2.0f;
+            QPoint center(x,y);
+            QCursor::setPos(__widget->mapToGlobal((center)));
+
             // Restore cursor
             __widget->releaseMouse();
-            //setCursorVisible(true);
+            setCursorVisible(true);
         }
 
         __mouseCaptured = captured;

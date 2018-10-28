@@ -86,7 +86,7 @@ public:
     void keyEvent(Keyboard::KeyEvent evt, int key);
     bool mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta);
     void updateCamera(float elapsedTime);
-
+    void clearMoveFlag();
 
 private:
 

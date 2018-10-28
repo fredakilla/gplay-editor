@@ -87,30 +87,24 @@ void GPDevice::keyEvent(Keyboard::KeyEvent evt, int key)
 
 bool GPDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 {
+    switch (evt)
+    {
+    case Mouse::MOUSE_PRESS_RIGHT_BUTTON:
+        setMouseCaptured(true);
+        break;
+    case Mouse::MOUSE_RELEASE_RIGHT_BUTTON:
+        setMouseCaptured(false);
+        break;
+    default:
+        break;
+    }
+
     std::shared_ptr<MouseEvent> mouseEvent = MouseEvent::create();
     mouseEvent.get()->event = evt;
     mouseEvent.get()->mousePos = Vector2(x, y);
     EventManager::getInstance()->queueEvent(mouseEvent);
 
-    switch (evt)
-    {
-    case Mouse::MOUSE_MOVE:
-        return true;
-    case Mouse::MOUSE_PRESS_LEFT_BUTTON:
-        return true;
-    case Mouse::MOUSE_RELEASE_LEFT_BUTTON:
-        return true;
-    case Mouse::MOUSE_PRESS_RIGHT_BUTTON:
-        setMouseCaptured(true);
-        return true;
-    case Mouse::MOUSE_RELEASE_RIGHT_BUTTON:
-        setMouseCaptured(false);
-        return true;
-    default:
-        return false;
-    }
-
-    return false;
+    return true;
 }
 
 void GPDevice::resizeRenderView(int width, int height)
