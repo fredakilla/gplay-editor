@@ -81,7 +81,7 @@ MainWindow::MainWindow(QWidget* parent)
     createActions();
     createMenus();
 
-    GplayDevice::get().createRenderWindow((void*)_renderView);
+    GplayDevice::getInstance()->createRenderWindow((void*)_renderView);
 
     _gameLoopTimerId = startTimer(0);
 }
@@ -202,13 +202,13 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::shutdown()
 {
     killTimer(_gameLoopTimerId);
-    GplayDevice::get().stop();
+    GplayDevice::getInstance()->stop();
 }
 
 void MainWindow::timerEvent(QTimerEvent* event)
 {
     QMainWindow::timerEvent(event);
-    GplayDevice::get().runFrame();
+    GplayDevice::getInstance()->runFrame();
 }
 
 void MainWindow::showNode(QtNodes::Node& node)
@@ -219,7 +219,7 @@ void MainWindow::showNode(QtNodes::Node& node)
     {
         if(systemNode->getResult().get() != nullptr)
         {
-           GplayDevice::get().setCurentParticleSystem(systemNode->getResult());
+           GplayDevice::getInstance()->setCurentParticleSystem(systemNode->getResult());
         }
 
         return;

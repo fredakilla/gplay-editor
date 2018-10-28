@@ -7,21 +7,23 @@
 
 using namespace gplay;
 
-class GplayDevice : public Game
+#include "core/Singleton.h"
+
+
+class GplayDeviceGame : public Game
 {
 public:
-    static GplayDevice& get();
+
+    GplayDeviceGame();
+    ~GplayDeviceGame();
+
     void createRenderWindow(void* hwnd);
     void runFrame();
     void stop();
     void resizeRenderView(int width, int height);
-
     void setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem);
 
 private:
-    GplayDevice();
-    ~GplayDevice();
-
     void initialize() override;
     void finalize() override;
     void update(float elapsedTime) override;
@@ -34,10 +36,11 @@ private:
     bool updateEmitters(gplay::Node* node, float elapsedTime);
 
 private:
-    static GplayDevice* _instance;
     Platform* _platform;
     Scene* _scene;
     bool _isShowDebug;  // show debug shapes in effects
 };
+
+typedef Singleton<GplayDeviceGame> GplayDevice;
 
 #endif // GPDEVICE_H

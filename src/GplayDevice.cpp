@@ -19,24 +19,11 @@
 // GPDevice
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
-GplayDevice* GplayDevice::_instance = nullptr;
-
 #include "gp3d/GPRenderer.h"
 GPRenderer3D* _curentSubRenderer;
 
 
-
-GplayDevice& GplayDevice::get()
-{
-    if(!_instance)
-    {
-        static GplayDevice static_instance;
-        _instance = &static_instance;
-    }
-    return *_instance;
-}
-
-GplayDevice::GplayDevice() :
+GplayDeviceGame::GplayDeviceGame() :
     _platform(nullptr),
     _scene(nullptr),
     _isShowDebug(true)
@@ -44,12 +31,12 @@ GplayDevice::GplayDevice() :
 
 }
 
-GplayDevice::~GplayDevice()
+GplayDeviceGame::~GplayDeviceGame()
 {
 
 }
 
-void GplayDevice::createRenderWindow(void* hwnd)
+void GplayDeviceGame::createRenderWindow(void* hwnd)
 {
     _platform = gplay::Platform::create(this, hwnd);
     GP_ASSERT(_platform);
@@ -62,7 +49,7 @@ void GplayDevice::createRenderWindow(void* hwnd)
     _curentSubRenderer = new OpClassNode_Renderer();
 }
 
-void GplayDevice::runFrame()
+void GplayDeviceGame::runFrame()
 {
     // begin frame
     Renderer::getInstance().beginFrame();
@@ -76,12 +63,12 @@ void GplayDevice::runFrame()
     Renderer::getInstance().endFrame();
 }
 
-void GplayDevice::stop()
+void GplayDeviceGame::stop()
 {
     _platform->stop();
 }
 
-void GplayDevice::keyEvent(Keyboard::KeyEvent evt, int key)
+void GplayDeviceGame::keyEvent(Keyboard::KeyEvent evt, int key)
 {
     // send key event
     std::shared_ptr<KeyEvent> keyEvent = KeyEvent::create();
@@ -90,7 +77,7 @@ void GplayDevice::keyEvent(Keyboard::KeyEvent evt, int key)
     EventManager::getInstance()->queueEvent(keyEvent);
 }
 
-bool GplayDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
+bool GplayDeviceGame::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 {
     // when right button is pressed set on mouse captured to interact with fps camera
     if(evt == Mouse::MOUSE_PRESS_RIGHT_BUTTON)
@@ -107,7 +94,7 @@ bool GplayDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta
     return true;
 }
 
-void GplayDevice::resizeRenderView(int width, int height)
+void GplayDeviceGame::resizeRenderView(int width, int height)
 {
     // resize game engine window
     _platform->setWindowSize(width, height);
@@ -119,7 +106,7 @@ void GplayDevice::resizeRenderView(int width, int height)
     _curentSubRenderer->resize(width, height);
 }
 
-void GplayDevice::initialize()
+void GplayDeviceGame::initialize()
 {
     // Create a new empty scene.
     _scene = Scene::create();
@@ -132,29 +119,29 @@ void GplayDevice::initialize()
     _scene->setActiveCamera(camera);
 }
 
-void GplayDevice::finalize()
+void GplayDeviceGame::finalize()
 {
 
 }
 
-void GplayDevice::update(float elapsedTime)
+void GplayDeviceGame::update(float elapsedTime)
 {
     _curentSubRenderer->update(elapsedTime);
 
-    _scene->visit(this, &GplayDevice::updateEmitters, elapsedTime);
+    _scene->visit(this, &GplayDeviceGame::updateEmitters, elapsedTime);
 }
 
-void GplayDevice::render(float elapsedTime)
+void GplayDeviceGame::render(float elapsedTime)
 {
     bgfx::touch(0);
 
     _curentSubRenderer->render(elapsedTime);
 
     View::getView(0)->bind();
-    _scene->visit(this, &GplayDevice::drawScene);
+    _scene->visit(this, &GplayDeviceGame::drawScene);
 }
 
-bool GplayDevice::drawScene(Node* node)
+bool GplayDeviceGame::drawScene(Node* node)
 {
     Drawable* drawable = node->getDrawable();
     if (drawable)
@@ -276,7 +263,7 @@ void drawDebugShapes(SparkParticleEmitter* spkEffect, Scene* scene)
     DebugDraw::getInstance()->end();
 }
 
-bool GplayDevice::updateEmitters(Node* node, float elapsedTime)
+bool GplayDeviceGame::updateEmitters(Node* node, float elapsedTime)
 {
     SparkParticleEmitter* spkEffect = dynamic_cast<SparkParticleEmitter*>(node->getDrawable());
     if (spkEffect)
@@ -291,7 +278,7 @@ bool GplayDevice::updateEmitters(Node* node, float elapsedTime)
     return true;
 }
 
-void GplayDevice::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
+void GplayDeviceGame::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
 {
     Node* node = _scene->findNode("sparkSystem");
     if(node)

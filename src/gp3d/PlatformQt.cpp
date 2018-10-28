@@ -183,7 +183,7 @@ bool GPlayWidgetEventFilter::eventFilter(QObject *watched, QEvent *event)
     case QEvent::Resize:
         {
             QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
-            GplayDevice::get().resizeRenderView(resizeEvent->size().width(), resizeEvent->size().height());
+            GplayDevice::getInstance()->resizeRenderView(resizeEvent->size().width(), resizeEvent->size().height());
         }
         break;
 
