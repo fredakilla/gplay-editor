@@ -1,6 +1,6 @@
 #include "GPDevice.h"
 
-GPDevice* GPDevice::_instance = nullptr;
+GplayDevice* GplayDevice::_instance = nullptr;
 
 #include <spark/SPARK.h>
 #include <sparkparticles/SparkParticleEmitter.h>
@@ -14,7 +14,7 @@ GPDevice* GPDevice::_instance = nullptr;
 
 #include "gp3d/helpers/Events.h"
 
-
+#include "gp3d/QtImGui.h"
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -22,17 +22,17 @@ GPDevice* GPDevice::_instance = nullptr;
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-GPDevice& GPDevice::get()
+GplayDevice& GplayDevice::get()
 {
     if(!_instance)
     {
-        static GPDevice static_instance;
+        static GplayDevice static_instance;
         _instance = &static_instance;
     }
     return *_instance;
 }
 
-GPDevice::GPDevice() :
+GplayDevice::GplayDevice() :
     _platform(nullptr),
     _scene(nullptr),
     _isShowDebug(true)
@@ -40,12 +40,12 @@ GPDevice::GPDevice() :
 
 }
 
-GPDevice::~GPDevice()
+GplayDevice::~GplayDevice()
 {
 
 }
 
-void GPDevice::createRenderWindow(void* hwnd)
+void GplayDevice::createRenderWindow(void* hwnd)
 {
     _platform = gplay::Platform::create(this, hwnd);
     GP_ASSERT(_platform);
@@ -58,26 +58,31 @@ void GPDevice::createRenderWindow(void* hwnd)
     View::create(0, Rectangle(200, 200), View::ClearFlags::COLOR_DEPTH, 0x556677ff, 1.0f, 0);
 }
 
-void GPDevice::beginFrame()
+void GplayDevice::beginFrame()
 {
+    Renderer::getInstance().beginFrame();
+    QtImGui::newFrame();
     bgfx::touch(0);
     View::getView(0)->bind();
 }
 
-void GPDevice::endFrame()
+void GplayDevice::endFrame()
 {
-    _platform->processEvents();
-    _platform->frame();
+    frame();
+    ImGui::Render();
+    Renderer::getInstance().endFrame();
+    //_platform->processEvents();
+    //_platform->frame();
 }
 
-void GPDevice::stop()
+void GplayDevice::stop()
 {
     _platform->stop();
 }
 
 
 
-void GPDevice::keyEvent(Keyboard::KeyEvent evt, int key)
+void GplayDevice::keyEvent(Keyboard::KeyEvent evt, int key)
 {
     std::shared_ptr<KeyEvent> keyEvent = KeyEvent::create();
     keyEvent.get()->event = evt;
@@ -85,7 +90,7 @@ void GPDevice::keyEvent(Keyboard::KeyEvent evt, int key)
     EventManager::getInstance()->queueEvent(keyEvent);
 }
 
-bool GPDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
+bool GplayDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 {
     switch (evt)
     {
@@ -107,7 +112,7 @@ bool GPDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
     return true;
 }
 
-void GPDevice::resizeRenderView(int width, int height)
+void GplayDevice::resizeRenderView(int width, int height)
 {
     // resize game engine window
     _platform->setWindowSize(width, height);
@@ -128,7 +133,7 @@ void GPDevice::resizeRenderView(int width, int height)
 
 }
 
-void GPDevice::initialize()
+void GplayDevice::initialize()
 {
     // Create a new empty scene.
     _scene = Scene::create();
@@ -141,21 +146,21 @@ void GPDevice::initialize()
     _scene->setActiveCamera(camera);
 }
 
-void GPDevice::finalize()
+void GplayDevice::finalize()
 {
 
 }
 
-void GPDevice::update(float elapsedTime)
+void GplayDevice::update(float elapsedTime)
 {
-    _scene->visit(this, &GPDevice::updateEmitters, elapsedTime);
+    _scene->visit(this, &GplayDevice::updateEmitters, elapsedTime);
 }
 
-void GPDevice::render(float elapsedTime)
+void GplayDevice::render(float elapsedTime)
 {
     //bgfx::touch(0);
 
-    static float axis[] = { 0.2f, 0.4f, 0.3f };
+    /*static float axis[] = { 0.2f, 0.4f, 0.3f };
     static float speed = { 0.5f };
     static ImVec4 clear_color = ImColor(114, 144, 154);
     ImGui::SetNextWindowSize(ImVec2(200,200), ImGuiCond_FirstUseEver);
@@ -164,7 +169,7 @@ void GPDevice::render(float elapsedTime)
     ImGui::SliderFloat("Speed", &speed, -10.0f, 10.0f);
     ImGui::ColorEdit3("clear color", (float*)&clear_color);
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();
+    ImGui::End();*/
 
     //ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
     //ImGui::ShowTestWindow();
@@ -172,10 +177,10 @@ void GPDevice::render(float elapsedTime)
 
 
     View::getView(0)->bind();
-    _scene->visit(this, &GPDevice::drawScene);
+    _scene->visit(this, &GplayDevice::drawScene);
 }
 
-bool GPDevice::drawScene(Node* node)
+bool GplayDevice::drawScene(Node* node)
 {
     Drawable* drawable = node->getDrawable();
     if (drawable)
@@ -297,7 +302,7 @@ void drawDebugShapes(SparkParticleEmitter* spkEffect, Scene* scene)
     DebugDraw::getInstance()->end();
 }
 
-bool GPDevice::updateEmitters(Node* node, float elapsedTime)
+bool GplayDevice::updateEmitters(Node* node, float elapsedTime)
 {
     SparkParticleEmitter* spkEffect = dynamic_cast<SparkParticleEmitter*>(node->getDrawable());
     if (spkEffect)
@@ -312,7 +317,7 @@ bool GPDevice::updateEmitters(Node* node, float elapsedTime)
     return true;
 }
 
-void GPDevice::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
+void GplayDevice::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
 {
     Node* node = _scene->findNode("sparkSystem");
     if(node)

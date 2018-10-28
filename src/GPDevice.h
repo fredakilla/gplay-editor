@@ -10,10 +10,10 @@ using namespace gplay;
 
 
 
-class GPDevice : public Game
+class GplayDevice : public Game
 {
 public:
-    static GPDevice& get();
+    static GplayDevice& get();
     void createRenderWindow(void* hwnd);
     void beginFrame();
     void endFrame();
@@ -23,8 +23,8 @@ public:
     void setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem);
 
 private:
-    GPDevice();
-    ~GPDevice();
+    GplayDevice();
+    ~GplayDevice();
 
     void initialize() override;
     void finalize() override;
@@ -41,7 +41,7 @@ private:
 
 
 
-    static GPDevice* _instance;
+    static GplayDevice* _instance;
     Platform* _platform;
     Scene* _scene;
     bool _isShowDebug;  // show debug shapes in effects

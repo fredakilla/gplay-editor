@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget* parent)
     _dockView->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::TopDockWidgetArea, _dockView);
 
-    GPDevice::get().createRenderWindow((void*)_renderView);
+    GplayDevice::get().createRenderWindow((void*)_renderView);
     _gpRenderer = new OpClassNode_Renderer();
 
 
@@ -203,7 +203,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::shutdown()
 {
     killTimer(_gameLoopTimerId);
-    GPDevice::get().stop();
+    GplayDevice::get().stop();
 }
 
 
@@ -213,23 +213,17 @@ void MainWindow::timerEvent(QTimerEvent* event)
 {
     QWidget::timerEvent(event);
 
-
-
-
     // compute timestep for manually updating gplay
     static float lasttime = 0.0f;
     float step = m_time - lasttime;
     lasttime = m_time;
     if(step < 0)
-        step = 0.0f;
+        step = 0.0f;    
 
-
-    GPDevice::get().beginFrame();
-
+    GplayDevice::get().beginFrame();
     _gpRenderer->update(step);
     _gpRenderer->render();
-
-    GPDevice::get().endFrame();
+    GplayDevice::get().endFrame();
 }
 
 void MainWindow::showNode(QtNodes::Node& node)
@@ -240,7 +234,7 @@ void MainWindow::showNode(QtNodes::Node& node)
     {
         if(systemNode->getResult().get() != nullptr)
         {
-           GPDevice::get().setCurentParticleSystem(systemNode->getResult());
+           GplayDevice::get().setCurentParticleSystem(systemNode->getResult());
         }
 
         return;

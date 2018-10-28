@@ -183,7 +183,7 @@ bool GPlayWidgetEventFilter::eventFilter(QObject *watched, QEvent *event)
     case QEvent::Resize:
         {
             QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
-            GPDevice::get().resizeRenderView(resizeEvent->size().width(), resizeEvent->size().height());
+            GplayDevice::get().resizeRenderView(resizeEvent->size().width(), resizeEvent->size().height());
         }
         break;
 
@@ -438,19 +438,12 @@ void Platform::stop()
 
 void Platform::frame()
 {
-    if (_game)
-    {
-        Renderer::getInstance().beginFrame();        
-        QtImGui::newFrame();
-        _game->frame();
-        ImGui::Render();
-        Renderer::getInstance().endFrame();
-    }
+    // nothing here, see: GplayDevice
 }
 
 int Platform::processEvents()
 {
-    // see GPlayWidgetEventFilter
+    // nothing here, see: GPlayWidgetEventFilter
     return 1;
 }
 

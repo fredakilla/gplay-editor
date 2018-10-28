@@ -188,7 +188,7 @@ void NodeSparkSystem::process()
         }
     }
 
-    GPDevice::get().setCurentParticleSystem(_system);
+    GplayDevice::get().setCurentParticleSystem(_system);
 }
 
 
