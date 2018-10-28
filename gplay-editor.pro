@@ -77,7 +77,6 @@ SOURCES += \
     src/GraphView.cpp \
     src/main.cpp \
     src/MainWindow.cpp \
-    src/RenderViewWidget.cpp \
     src/gp3d/helpers/FirstPersonCamera.cpp \
     src/gp3d/helpers/Grid.cpp \
     src/gp3d/GPRenderer.cpp \
@@ -106,7 +105,6 @@ HEADERS += \
     src/GPDevice.h \
     src/GraphView.h \
     src/MainWindow.h \
-    src/RenderViewWidget.h \
     src/node-editor/spark-nodes/spark-nodes.h \
     src/gp3d/helpers/FirstPersonCamera.h \
     src/gp3d/helpers/Grid.h \

@@ -15,8 +15,7 @@
 using QtNodes::DataModelRegistry;
 
 
-#include "gp3d/GPRenderer.h"
-GPRenderer3D* _gpRenderer;
+
 
 
 
@@ -78,11 +77,28 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
     //setNodeStyle();
+    createWidgets();
     createActions();
     createMenus();
 
+    GplayDevice::get().createRenderWindow((void*)_renderView);
 
-    // create widget for gplay engine view
+    _gameLoopTimerId = startTimer(0);
+}
+
+MainWindow::~MainWindow()
+{
+    delete _nodeScene;
+    delete _nodeView;
+    delete _renderView;
+    delete _viewportContainer;
+    delete _dockView;
+    delete _dockNodeGraph;
+}
+
+void MainWindow::createWidgets()
+{
+    // create gplay viewport widget
     _renderView = new QWidget(this);
     _renderView->setMouseTracking(true);
     _renderView->setFocusPolicy(Qt::StrongFocus);
@@ -91,15 +107,10 @@ MainWindow::MainWindow(QWidget* parent)
     _viewportContainer->setLayout(new QVBoxLayout());
     _viewportContainer->layout()->addWidget(_renderView);
 
-
     _dockView = new QDockWidget("Viewport", this);
     _dockView->setWidget(_viewportContainer);
     _dockView->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::TopDockWidgetArea, _dockView);
-
-    GplayDevice::get().createRenderWindow((void*)_renderView);
-    _gpRenderer = new OpClassNode_Renderer();
-
 
     _nodeScene = new CustomFlowScene(registerDataModels());
     _nodeView = new FlowView(_nodeScene);
@@ -127,44 +138,32 @@ MainWindow::MainWindow(QWidget* parent)
     // connect to FlowView deleteSelectionAction a method to delete comments graphics items.
     QAction* deleteAction = _nodeView->deleteSelectionAction();
     connect(deleteAction, &QAction::triggered, _nodeScene, &CustomFlowScene::deleteSelectedComments);
-
-    _gameLoopTimerId = startTimer(0);
-}
-
-MainWindow::~MainWindow()
-{
-    delete _nodeScene;
-    delete _nodeView;
-    delete _renderView;
-    delete _viewportContainer;
-    delete _dockView;
-    delete _dockNodeGraph;
 }
 
 void MainWindow::createActions()
 {
-    newAct = new QAction(tr("&New"), this);
-    newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("New"));
-    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
+    _newAct = new QAction(tr("&New"), this);
+    _newAct->setShortcuts(QKeySequence::New);
+    _newAct->setStatusTip(tr("New"));
+    connect(_newAct, &QAction::triggered, this, &MainWindow::newFile);
 
-    openAct = new QAction(tr("&Open"), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open"));
-    connect(openAct, &QAction::triggered, this, &MainWindow::open);
+    _openAct = new QAction(tr("&Open"), this);
+    _openAct->setShortcuts(QKeySequence::Open);
+    _openAct->setStatusTip(tr("Open"));
+    connect(_openAct, &QAction::triggered, this, &MainWindow::open);
 
-    saveAct = new QAction(tr("&Save"), this);
-    saveAct->setShortcuts(QKeySequence::Save);
-    saveAct->setStatusTip(tr("Save"));
-    connect(saveAct, &QAction::triggered, this, &MainWindow::save);
+    _saveAct = new QAction(tr("&Save"), this);
+    _saveAct->setShortcuts(QKeySequence::Save);
+    _saveAct->setStatusTip(tr("Save"));
+    connect(_saveAct, &QAction::triggered, this, &MainWindow::save);
 }
 
 void MainWindow::createMenus()
 {
-    fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(newAct);
-    fileMenu->addAction(openAct);
-    fileMenu->addAction(saveAct);
+    _fileMenu = menuBar()->addMenu(tr("&File"));
+    _fileMenu->addAction(_newAct);
+    _fileMenu->addAction(_openAct);
+    _fileMenu->addAction(_saveAct);
 }
 
 void MainWindow::newFile()
@@ -206,24 +205,10 @@ void MainWindow::shutdown()
     GplayDevice::get().stop();
 }
 
-
-float m_time = 0;
-
 void MainWindow::timerEvent(QTimerEvent* event)
 {
-    QWidget::timerEvent(event);
-
-    // compute timestep for manually updating gplay
-    static float lasttime = 0.0f;
-    float step = m_time - lasttime;
-    lasttime = m_time;
-    if(step < 0)
-        step = 0.0f;    
-
-    GplayDevice::get().beginFrame();
-    _gpRenderer->update(step);
-    _gpRenderer->render();
-    GplayDevice::get().endFrame();
+    QMainWindow::timerEvent(event);
+    GplayDevice::get().runFrame();
 }
 
 void MainWindow::showNode(QtNodes::Node& node)

@@ -5,24 +5,32 @@
 #include "helpers/FirstPersonCamera.h"
 #include "helpers/Grid.h"
 
-class IRenderer
+/**
+ * Interface class for sub-renderers
+ * A subrenderer manage it's own scene.
+ */
+class ISubRenderer
 {
-
 public:
-    virtual ~IRenderer() {}
-    virtual void resize(int width, int height) {}
-    virtual void update(float timestep) {}
-    virtual void render() = 0;
+    virtual ~ISubRenderer() {}
+    virtual void resize(int width, int height) = 0;
+    virtual void update(float elapsedTime) = 0;
+    virtual void render(float elapsedTime) = 0;
 };
 
 
-
-class GPRenderer3D : public IRenderer
+/**
+ * Base subrenderer for 3D view, with scene, fps camera and 3d grid.
+ */
+class GPRenderer3D : public ISubRenderer
 {
 
 public:
     GPRenderer3D();
-    void update(float timestep);
+
+    void update(float elapsedTime) override;
+    void resize(int width, int height) override;
+
     void onMouseEvent(EventDataRef eventData);
     void onKeyEvent(EventDataRef eventData);
 
@@ -49,13 +57,13 @@ public:
 
     }
 
-    void update(float timestep)
+    void update(float elapsedTime)
     {
-        GPRenderer3D::update(timestep);
-
+        // call super class method
+        GPRenderer3D::update(elapsedTime);
     }
 
-    void render()
+    void render(float elapsedTime)
     {
         // Create some ImGui controls to manage cube rotation
         static float axis[] = { 0.2f, 0.4f, 0.3f };

@@ -14,12 +14,12 @@ GPRenderer3D::GPRenderer3D()
     _scene->setActiveCamera(_fpCamera.getCamera());
     _scene->getActiveCamera()->setAspectRatio(4/3);
 
+    // load 3d grid
     loadGrid(_scene);
 
     // Add listeners for events
     EventManager::getInstance()->addListener(GP_EVENT_LISTENER(this, GPRenderer3D::onMouseEvent), MouseEvent::ID());
     EventManager::getInstance()->addListener(GP_EVENT_LISTENER(this, GPRenderer3D::onKeyEvent), KeyEvent::ID());
-
 }
 
 void GPRenderer3D::loadGrid(Scene* scene)
@@ -33,14 +33,23 @@ void GPRenderer3D::loadGrid(Scene* scene)
     SAFE_RELEASE(gridModel);
 }
 
-
-void GPRenderer3D::update(float timestep)
+void GPRenderer3D::resize(int width, int height)
 {
-    // get real game frame time, because timestep is relative to editor timeline
-    float frameTime = Game::getInstance()->getFrameTime();
+    if(_scene)
+    {
+        Camera* camera = _scene->getActiveCamera();
+        if(camera)
+        {
+            float ratio = (float)width / (float)height;
+            camera->setAspectRatio(ratio);
+        }
+    }
+}
 
+void GPRenderer3D::update(float elapsedTime)
+{
     if(Game::getInstance()->isMouseCaptured())
-        _fpCamera.updateCamera(frameTime);
+        _fpCamera.updateCamera(elapsedTime);
 }
 
 void GPRenderer3D::onMouseEvent(EventDataRef eventData)
@@ -57,7 +66,6 @@ void GPRenderer3D::onMouseEvent(EventDataRef eventData)
         _fpCamera.clearMoveFlag();
     }
 }
-
 
 void GPRenderer3D::onKeyEvent(EventDataRef eventData)
 {

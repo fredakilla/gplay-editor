@@ -24,15 +24,16 @@ private Q_SLOTS:
 
 private:
     void shutdown();
+    void createWidgets();
     void createActions();
     void createMenus();
     void closeEvent(QCloseEvent* event) override;
     void timerEvent(QTimerEvent* event) override;
 
-    QMenu *fileMenu;
-    QAction *newAct;
-    QAction *openAct;
-    QAction *saveAct;
+    QMenu* _fileMenu;
+    QAction* _newAct;
+    QAction* _openAct;
+    QAction* _saveAct;
 
     CustomFlowScene* _nodeScene;
     FlowView* _nodeView;

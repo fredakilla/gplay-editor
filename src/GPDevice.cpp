@@ -1,7 +1,5 @@
 #include "GPDevice.h"
 
-GplayDevice* GplayDevice::_instance = nullptr;
-
 #include <spark/SPARK.h>
 #include <sparkparticles/SparkParticleEmitter.h>
 #include <sparkparticles/SparkQuadRenderer.h>
@@ -20,6 +18,12 @@ GplayDevice* GplayDevice::_instance = nullptr;
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 // GPDevice
 //-----------------------------------------------------------------------------------------------------------------------------------------------
+
+GplayDevice* GplayDevice::_instance = nullptr;
+
+#include "gp3d/GPRenderer.h"
+GPRenderer3D* _curentSubRenderer;
+
 
 
 GplayDevice& GplayDevice::get()
@@ -49,30 +53,27 @@ void GplayDevice::createRenderWindow(void* hwnd)
 {
     _platform = gplay::Platform::create(this, hwnd);
     GP_ASSERT(_platform);
-
     _platform->start();
-
-    //gplay::Renderer::getInstance().toggleDebugStats();
 
     // create default view
     View::create(0, Rectangle(200, 200), View::ClearFlags::COLOR_DEPTH, 0x556677ff, 1.0f, 0);
+
+
+    _curentSubRenderer = new OpClassNode_Renderer();
 }
 
-void GplayDevice::beginFrame()
+void GplayDevice::runFrame()
 {
+    // begin frame
     Renderer::getInstance().beginFrame();
     QtImGui::newFrame();
-    bgfx::touch(0);
-    View::getView(0)->bind();
-}
 
-void GplayDevice::endFrame()
-{
+    // call gplay frame that will invoke update and render methods.
     frame();
+
+    // end frame
     ImGui::Render();
     Renderer::getInstance().endFrame();
-    //_platform->processEvents();
-    //_platform->frame();
 }
 
 void GplayDevice::stop()
@@ -80,10 +81,9 @@ void GplayDevice::stop()
     _platform->stop();
 }
 
-
-
 void GplayDevice::keyEvent(Keyboard::KeyEvent evt, int key)
 {
+    // send key event
     std::shared_ptr<KeyEvent> keyEvent = KeyEvent::create();
     keyEvent.get()->event = evt;
     keyEvent.get()->key = key;
@@ -92,18 +92,13 @@ void GplayDevice::keyEvent(Keyboard::KeyEvent evt, int key)
 
 bool GplayDevice::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 {
-    switch (evt)
-    {
-    case Mouse::MOUSE_PRESS_RIGHT_BUTTON:
+    // when right button is pressed set on mouse captured to interact with fps camera
+    if(evt == Mouse::MOUSE_PRESS_RIGHT_BUTTON)
         setMouseCaptured(true);
-        break;
-    case Mouse::MOUSE_RELEASE_RIGHT_BUTTON:
+    else if(evt == Mouse::MOUSE_RELEASE_RIGHT_BUTTON)
         setMouseCaptured(false);
-        break;
-    default:
-        break;
-    }
 
+    // send mouse event
     std::shared_ptr<MouseEvent> mouseEvent = MouseEvent::create();
     mouseEvent.get()->event = evt;
     mouseEvent.get()->mousePos = Vector2(x, y);
@@ -120,17 +115,8 @@ void GplayDevice::resizeRenderView(int width, int height)
     // resize default view
     View::getView(0)->setViewRect(Rectangle(width, height));
 
-
-    if(_scene)
-    {
-        Camera* camera = _scene->getActiveCamera();
-        if(camera)
-        {
-            float ratio = (float)width / (float)height;
-            camera->setAspectRatio(ratio);
-        }
-    }
-
+    // resize current renderer
+    _curentSubRenderer->resize(width, height);
 }
 
 void GplayDevice::initialize()
@@ -153,28 +139,16 @@ void GplayDevice::finalize()
 
 void GplayDevice::update(float elapsedTime)
 {
+    _curentSubRenderer->update(elapsedTime);
+
     _scene->visit(this, &GplayDevice::updateEmitters, elapsedTime);
 }
 
 void GplayDevice::render(float elapsedTime)
 {
-    //bgfx::touch(0);
+    bgfx::touch(0);
 
-    /*static float axis[] = { 0.2f, 0.4f, 0.3f };
-    static float speed = { 0.5f };
-    static ImVec4 clear_color = ImColor(114, 144, 154);
-    ImGui::SetNextWindowSize(ImVec2(200,200), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Cube Controls");
-    ImGui::SliderFloat3("Axis", axis, 0.0f, 1.0f);
-    ImGui::SliderFloat("Speed", &speed, -10.0f, 10.0f);
-    ImGui::ColorEdit3("clear color", (float*)&clear_color);
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();*/
-
-    //ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-    //ImGui::ShowTestWindow();
-
-
+    _curentSubRenderer->render(elapsedTime);
 
     View::getView(0)->bind();
     _scene->visit(this, &GplayDevice::drawScene);

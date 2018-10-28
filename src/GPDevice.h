@@ -5,18 +5,14 @@
 #include <spark/SPARK.h>
 #include <QObject>
 
-
 using namespace gplay;
-
-
 
 class GplayDevice : public Game
 {
 public:
     static GplayDevice& get();
     void createRenderWindow(void* hwnd);
-    void beginFrame();
-    void endFrame();
+    void runFrame();
     void stop();
     void resizeRenderView(int width, int height);
 
@@ -34,13 +30,10 @@ private:
     void keyEvent(Keyboard::KeyEvent evt, int key) override;
     bool mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta) override;
 
-
     bool drawScene(gplay::Node* node);
     bool updateEmitters(gplay::Node* node, float elapsedTime);
 
-
-
-
+private:
     static GplayDevice* _instance;
     Platform* _platform;
     Scene* _scene;
