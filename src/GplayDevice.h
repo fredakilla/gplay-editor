@@ -3,12 +3,8 @@
 
 #include <gplay-engine.h>
 #include <spark/SPARK.h>
-#include <QObject>
 
 using namespace gplay;
-
-#include "core/Singleton.h"
-
 
 class GplayDeviceGame : public Game
 {
