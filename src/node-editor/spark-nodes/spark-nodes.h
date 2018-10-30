@@ -6,5 +6,6 @@
 #include "SpkEmitters.h"
 #include "SpkModifiers.h"
 #include "SpkInterpolators.h"
+#include "SparkNodesRegistry.h"
 
 #endif // SPARKNODES_H

@@ -73,6 +73,7 @@ SOURCES += \
     src/node-editor/spark-nodes/SpkModifiers.cpp \
     src/node-editor/spark-nodes/SpkSystem.cpp \
     src/node-editor/spark-nodes/SpkZones.cpp \
+    src/node-editor/spark-nodes/SparkNodesRegistry.cpp \
     src/GraphView.cpp \
     src/main.cpp \
     src/MainWindow.cpp \
@@ -100,6 +101,7 @@ HEADERS += \
     src/node-editor/spark-nodes/SpkModifiers.h \
     src/node-editor/spark-nodes/SpkSystem.h \
     src/node-editor/spark-nodes/SpkZones.h \
+    src/node-editor/spark-nodes/SparkNodesRegistry.h \
     src/benchmark.h \
     src/GraphView.h \
     src/MainWindow.h \
@@ -111,5 +113,6 @@ HEADERS += \
     src/gp3d/QtImGui.h \
     src/gp3d/PlatformQt.h \
     src/GplayDevice.h
+
 
 
