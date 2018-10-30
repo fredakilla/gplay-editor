@@ -19,7 +19,7 @@ using QtNodes::DataModelRegistry;
 #include "node-editor/spark-nodes/spark-nodes.h"
 
 
-static std::shared_ptr<DataModelRegistry> registerDataModels()
+static std::shared_ptr<DataModelRegistry> registerSparkNodesDataModels()
 {
     auto ret = std::make_shared<DataModelRegistry>();
 
@@ -81,6 +81,11 @@ MainWindow::MainWindow(QWidget* parent)
     createActions();
     createMenus();
 
+    // create Nodes registry
+    _sparkNodesRegistry = registerSparkNodesDataModels();
+    _nodeFlowScene->setRegistry(_sparkNodesRegistry);
+
+    // create gplay render view into _renderView widget
     GplayDevice::getInstance()->createRenderWindow((void*)_renderView);
 
     _gameLoopTimerId = startTimer(0);
@@ -88,12 +93,12 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
-    delete _nodeScene;
-    delete _nodeView;
+    delete _nodeFlowScene;
+    delete _nodeFlowView;
     delete _renderView;
     delete _viewportContainer;
     delete _dockView;
-    delete _dockNodeGraph;
+    delete _dockNodeFlowView;
 }
 
 void MainWindow::createWidgets()
@@ -112,17 +117,18 @@ void MainWindow::createWidgets()
     _dockView->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::TopDockWidgetArea, _dockView);
 
-    _nodeScene = new CustomFlowScene(registerDataModels());
-    _nodeView = new FlowView(_nodeScene);
-    _nodeView->setWindowTitle("Node-based flow editor");
-    _nodeView->resize(800, 600);
-    _nodeView->show();
-    _nodeView->scale(0.9, 0.9);
+    _nodeFlowScene = new CustomFlowScene();
 
-    _dockNodeGraph = new QDockWidget("NodeGraph", this);
-    _dockNodeGraph->setWidget(_nodeView);
-    _dockNodeGraph->setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::BottomDockWidgetArea, _dockNodeGraph);
+    _nodeFlowView = new FlowView(_nodeFlowScene);
+    _nodeFlowView->setWindowTitle("Node-based flow editor");
+    _nodeFlowView->resize(800, 600);
+    _nodeFlowView->show();
+    _nodeFlowView->scale(0.9, 0.9);
+
+    _dockNodeFlowView = new QDockWidget("NodeGraph", this);
+    _dockNodeFlowView->setWidget(_nodeFlowView);
+    _dockNodeFlowView->setAllowedAreas(Qt::AllDockWidgetAreas);
+    addDockWidget(Qt::BottomDockWidgetArea, _dockNodeFlowView);
 
     _pathView = new GraphView(this);
 
@@ -134,11 +140,11 @@ void MainWindow::createWidgets()
 
     // make some connections
 
-    connect(_nodeScene, &CustomFlowScene::showPathNodeRequest, _pathView, &GraphView::setPathNode);
+    connect(_nodeFlowScene, &CustomFlowScene::showPathNodeRequest, _pathView, &GraphView::setPathNode);
 
     // connect to FlowView deleteSelectionAction a method to delete comments graphics items.
-    QAction* deleteAction = _nodeView->deleteSelectionAction();
-    connect(deleteAction, &QAction::triggered, _nodeScene, &CustomFlowScene::deleteSelectedComments);
+    QAction* deleteAction = _nodeFlowView->deleteSelectionAction();
+    connect(deleteAction, &QAction::triggered, _nodeFlowScene, &CustomFlowScene::deleteSelectedComments);
 }
 
 void MainWindow::createActions()
@@ -169,18 +175,18 @@ void MainWindow::createMenus()
 
 void MainWindow::newFile()
 {
-    _nodeScene->clearScene();
-    _nodeScene->clearComments();
+    _nodeFlowScene->clearScene();
+    _nodeFlowScene->clearComments();
 }
 
 void MainWindow::open()
 {
-    _nodeScene->load();
+    _nodeFlowScene->load();
 }
 
 void MainWindow::save()
 {
-    _nodeScene->save();
+    _nodeFlowScene->save();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

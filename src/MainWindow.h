@@ -28,18 +28,23 @@ private:
     void closeEvent(QCloseEvent* event) override;
     void timerEvent(QTimerEvent* event) override;
 
+
+    std::shared_ptr<DataModelRegistry> _sparkNodesRegistry;
+
+    // GUI stuff
+
     QMenu* _fileMenu;
     QAction* _newAct;
     QAction* _openAct;
     QAction* _saveAct;
 
-    CustomFlowScene* _nodeScene;
-    FlowView* _nodeView;
+    CustomFlowScene* _nodeFlowScene;
+    FlowView* _nodeFlowView;
     QWidget* _viewportContainer;
     QWidget* _renderView;
     GraphView* _pathView;
     QDockWidget* _dockView;
-    QDockWidget* _dockNodeGraph;
+    QDockWidget* _dockNodeFlowView;
     QDockWidget* _dockGraph;
     int _gameLoopTimerId;
 };
