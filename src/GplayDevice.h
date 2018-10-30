@@ -28,13 +28,13 @@ private:
     void keyEvent(Keyboard::KeyEvent evt, int key) override;
     bool mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta) override;
 
-    bool drawScene(gplay::Node* node);
-    bool updateEmitters(gplay::Node* node, float elapsedTime);
+   // bool drawScene(gplay::Node* node);
+   // bool updateEmitters(gplay::Node* node, float elapsedTime);
 
 private:
     Platform* _platform;
-    Scene* _scene;
-    bool _isShowDebug;  // show debug shapes in effects
+    //Scene* _scene;
+    //bool _isShowDebug;  // show debug shapes in effects
 };
 
 typedef Singleton<GplayDeviceGame> GplayDevice;

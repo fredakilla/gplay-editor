@@ -8,4 +8,5 @@
 #include "SpkInterpolators.h"
 #include "SparkNodesRegistry.h"
 
+
 #endif // SPARKNODES_H

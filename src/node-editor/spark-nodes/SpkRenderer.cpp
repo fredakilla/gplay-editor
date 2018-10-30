@@ -1,153 +1,12 @@
-#include "GplayDevice.h"
+#include "SpkRenderer.h"
 
 #include <spark/SPARK.h>
+#include <sparkparticles/SparkParticleEmitter.h>
+#include <sparkparticles/SparkQuadRenderer.h>
+#include <sparkparticles/SparkParticleEmitter.h>
+#include "SpkUtils.h"
 
 
-#include "node-editor/common/BaseNode.h"
-
-#include <imgui/imgui.h>
-
-
-#include "gp3d/helpers/Events.h"
-
-#include "gp3d/QtImGui.h"
-
-#include "node-editor/spark-nodes/SpkRenderer.h"
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-// GPDevice
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-
-#include "gp3d/GPRenderer.h"
-ISubRenderer* _curentSubRenderer;
-
-
-GplayDeviceGame::GplayDeviceGame() :
-    _platform(nullptr)
-    //_scene(nullptr)
-   // _isShowDebug(true)
-{
-
-}
-
-GplayDeviceGame::~GplayDeviceGame()
-{
-
-}
-
-void GplayDeviceGame::createRenderWindow(void* hwnd)
-{
-    _platform = gplay::Platform::create(this, hwnd);
-    GP_ASSERT(_platform);
-    _platform->start();
-
-    // create default view
-    View::create(0, Rectangle(200, 200), View::ClearFlags::COLOR_DEPTH, 0x556677ff, 1.0f, 0);
-
-
-    _curentSubRenderer = new SpkRenderer();//OpClassNode_Renderer();
-}
-
-void GplayDeviceGame::runFrame()
-{
-    // begin frame
-    Renderer::getInstance().beginFrame();
-    QtImGui::newFrame();
-
-    // call gplay frame that will invoke update and render methods.
-    frame();
-
-    // end frame
-    ImGui::Render();
-    Renderer::getInstance().endFrame();
-}
-
-void GplayDeviceGame::stop()
-{
-    _platform->stop();
-}
-
-void GplayDeviceGame::keyEvent(Keyboard::KeyEvent evt, int key)
-{
-    // send key event
-    std::shared_ptr<KeyEvent> keyEvent = KeyEvent::create();
-    keyEvent.get()->event = evt;
-    keyEvent.get()->key = key;
-    EventManager::getInstance()->queueEvent(keyEvent);
-}
-
-bool GplayDeviceGame::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
-{
-    // when right button is pressed set on mouse captured to interact with fps camera
-    if(evt == Mouse::MOUSE_PRESS_RIGHT_BUTTON)
-        setMouseCaptured(true);
-    else if(evt == Mouse::MOUSE_RELEASE_RIGHT_BUTTON)
-        setMouseCaptured(false);
-
-    // send mouse event
-    std::shared_ptr<MouseEvent> mouseEvent = MouseEvent::create();
-    mouseEvent.get()->event = evt;
-    mouseEvent.get()->mousePos = Vector2(x, y);
-    EventManager::getInstance()->queueEvent(mouseEvent);
-
-    return true;
-}
-
-void GplayDeviceGame::resizeRenderView(int width, int height)
-{
-    // resize game engine window
-    _platform->setWindowSize(width, height);
-
-    // resize default view
-    View::getView(0)->setViewRect(Rectangle(width, height));
-
-    // resize current renderer
-    _curentSubRenderer->resize(width, height);
-}
-
-void GplayDeviceGame::initialize()
-{
-   /* // Create a new empty scene.
-    _scene = Scene::create();
-
-    // create camera
-    Camera* camera = Camera::createPerspective(45.0f, 1.77f, 0.1f, 100.0f);
-    Node* cameraNode = _scene->addNode("camera");
-    cameraNode->setCamera(camera);
-    cameraNode->setTranslation(Vector3(0,0,10));
-    _scene->setActiveCamera(camera);*/
-}
-
-void GplayDeviceGame::finalize()
-{
-
-}
-
-void GplayDeviceGame::update(float elapsedTime)
-{
-    _curentSubRenderer->update(elapsedTime);
-}
-
-void GplayDeviceGame::render(float elapsedTime)
-{
-    bgfx::touch(0);
-
-    _curentSubRenderer->render(elapsedTime);
-
-    //View::getView(0)->bind();
-   // _scene->visit(this, &GplayDeviceGame::drawScene);
-}
-
-/*bool GplayDeviceGame::drawScene(Node* node)
-{
-    Drawable* drawable = node->getDrawable();
-    if (drawable)
-        drawable->draw();
-    return true;
-}*/
-
-/*
 void createDebugGeomteriesFromZone(const SPK::Ref<SPK::Zone> zone)
 {
     // every zone has a position
@@ -263,7 +122,66 @@ void drawDebugShapes(SparkParticleEmitter* spkEffect, Scene* scene)
 }
 
 
-bool GplayDeviceGame::updateEmitters(Node* node, float elapsedTime)
+
+
+
+
+
+SpkRenderer::SpkRenderer() :
+    GPRenderer3D(),
+    _isShowDebug(true)
+{
+
+}
+
+void SpkRenderer::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
+{
+    Node* node = _scene->findNode("sparkSystem");
+    if(node)
+        _scene->removeNode(node);
+
+    // Create a node in scene and attach spark foutain effect
+    SparkParticleEmitter* foutainEmitter = SparkParticleEmitter::createRef(sparkSystem, true);
+    Node* particleNode = Node::create("sparkSystem");
+    particleNode->setDrawable(foutainEmitter);
+    particleNode->setTranslation(0.0f, 0.0f, 0.0f);
+
+    _scene->addNode(particleNode);
+}
+
+void SpkRenderer::update(float elapsedTime)
+{
+    // call super class method
+    GPRenderer3D::update(elapsedTime);
+
+    _scene->visit(this, &SpkRenderer::updateEmitters, elapsedTime);
+
+}
+
+void SpkRenderer::render(float elapsedTime)
+{
+    // Create some ImGui controls to manage cube rotation
+    static float axis[] = { 0.2f, 0.4f, 0.3f };
+    static float speed = { 0.5f };
+    ImGui::SetNextWindowSize(ImVec2(200,200), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Cube Controls");
+    ImGui::SliderFloat3("Axis", axis, 0.0f, 1.0f);
+    ImGui::SliderFloat("Speed", &speed, -10.0f, 10.0f);
+    ImGui::End();
+
+    View::getView(0)->bind();
+    _scene->visit(this, &SpkRenderer::drawScene);
+}
+
+bool SpkRenderer::drawScene(Node* node)
+{
+    Drawable* drawable = node->getDrawable();
+    if (drawable)
+        drawable->draw();
+    return true;
+}
+
+bool SpkRenderer::updateEmitters(Node* node, float elapsedTime)
 {
     SparkParticleEmitter* spkEffect = dynamic_cast<SparkParticleEmitter*>(node->getDrawable());
     if (spkEffect)
@@ -276,23 +194,5 @@ bool GplayDeviceGame::updateEmitters(Node* node, float elapsedTime)
     }
 
     return true;
-}*/
-
-void GplayDeviceGame::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
-{
-    SpkRenderer* _spkRenderer = dynamic_cast<SpkRenderer*>(_curentSubRenderer);
-    if(_spkRenderer)
-        _spkRenderer->setCurentParticleSystem(sparkSystem);
-
-    /*Node* node = _scene->findNode("sparkSystem");
-    if(node)
-        _scene->removeNode(node);
-
-    // Create a node in scene and attach spark foutain effect
-    SparkParticleEmitter* foutainEmitter = SparkParticleEmitter::createRef(sparkSystem, true);
-    Node* particleNode = Node::create("sparkSystem");
-    particleNode->setDrawable(foutainEmitter);
-    particleNode->setTranslation(0.0f, 0.0f, 0.0f);
-
-    _scene->addNode(particleNode);*/
 }
+
