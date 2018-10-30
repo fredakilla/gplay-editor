@@ -9,14 +9,14 @@
 #include <QVBoxLayout>
 
 #include "node-editor/common/Nodestyle.h"
-#include "node-editor/spark-nodes/spark-nodes.h"
+
 
 #include <nodes/DataModelRegistry>
 using QtNodes::DataModelRegistry;
 
 
 
-
+#include "node-editor/spark-nodes/spark-nodes.h"
 
 
 static std::shared_ptr<DataModelRegistry> registerDataModels()
@@ -132,8 +132,9 @@ void MainWindow::createWidgets()
     addDockWidget(Qt::TopDockWidgetArea, _dockGraph);
 
 
-    connect(_nodeScene, &FlowScene::nodeDoubleClicked, this, &MainWindow::showNode);
-    connect(_nodeScene, &FlowScene::nodeCreated, this, &MainWindow::initNode);
+    // make some connections
+
+    connect(_nodeScene, &CustomFlowScene::showPathNodeRequest, _pathView, &GraphView::setPathNode);
 
     // connect to FlowView deleteSelectionAction a method to delete comments graphics items.
     QAction* deleteAction = _nodeView->deleteSelectionAction();
@@ -209,36 +210,4 @@ void MainWindow::timerEvent(QTimerEvent* event)
 {
     QMainWindow::timerEvent(event);
     GplayDevice::getInstance()->runFrame();
-}
-
-void MainWindow::showNode(QtNodes::Node& node)
-{
-    // is a system node ?
-    NodeSparkSystem* systemNode = dynamic_cast<NodeSparkSystem*>(node.nodeDataModel());
-    if(systemNode)
-    {
-        if(systemNode->getResult().get() != nullptr)
-        {
-           GplayDevice::getInstance()->setCurentParticleSystem(systemNode->getResult());
-        }
-
-        return;
-    }
-
-    // is a Path node ?
-    NodePath* pathNode = dynamic_cast<NodePath*>(node.nodeDataModel());
-    if(pathNode)
-    {
-        if(pathNode->getResult() != nullptr)
-        {
-            _pathView->setPathNode(pathNode);
-        }
-        return;
-    }
-}
-
-void MainWindow::initNode(QtNodes::Node& node)
-{
-    BaseNode* baseNode = dynamic_cast<BaseNode*>(node.nodeDataModel());
-    baseNode->init();
 }

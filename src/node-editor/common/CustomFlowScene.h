@@ -12,6 +12,7 @@ using QtNodes::FlowView;
 using QtNodes::FlowScene;
 using QtNodes::DataModelRegistry;
 
+class NodePath;
 
 // empty graphic item used as parent container for comments items
 class QGraphicsItemLayer : public QGraphicsItem
@@ -27,6 +28,8 @@ public:
     }
 };
 
+
+
 class CustomFlowScene : public FlowScene
 {
     Q_OBJECT
@@ -41,8 +44,15 @@ public:
     void saveCommentsToJson(QJsonObject &json) const;
     void loadCommentsFromMemory(const QByteArray& data);
 
+Q_SIGNALS:
+    void showPathNodeRequest(NodePath*);
+
 public Q_SLOTS:
     void deleteSelectedComments();
+
+private Q_SLOTS:
+    void showNode(Node& node);
+    void initNode(QtNodes::Node& node);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -50,6 +60,7 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
+    void _initialize();
     eCommentItem* _addComment(const QPointF &pos);
 
 private:

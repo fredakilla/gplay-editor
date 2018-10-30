@@ -16,11 +16,9 @@ public:
     ~MainWindow();
 
 private Q_SLOTS:
-    void showNode(Node& node);
     void newFile();
     void open();
     void save();
-    void initNode(QtNodes::Node& node);
 
 private:
     void shutdown();

@@ -56,6 +56,8 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+
+public Q_SLOTS:
     void setPathNode(NodePath* node);
 
 private Q_SLOTS:

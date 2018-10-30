@@ -103,7 +103,7 @@ NodeValidationState BaseNode::validationState() const
         //qFatal("Fatal: _paramWidget was not created for node '%s'", Name().toStdString().c_str());
         // or
         // force it here ?? (may be issues when serialize ?? to test...)
-        qWarning("Warning: _paramWidget was not created for node '%s'", Name().toStdString().c_str());
+        //qWarning("Warning: _paramWidget was not created for node '%s'", Name().toStdString().c_str());
         (const_cast<BaseNode*>(this))->createParamWidgets();
     }
 

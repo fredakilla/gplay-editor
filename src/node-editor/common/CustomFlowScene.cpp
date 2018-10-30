@@ -13,24 +13,34 @@
 #include <QtCore/QJsonArray>
 #include <QDebug>
 
+#include "../spark-nodes/spark-nodes.h"
+#include "../../GplayDevice.h"
+
 
 CustomFlowScene::CustomFlowScene(std::shared_ptr<DataModelRegistry> registry, QObject * parent) :
     FlowScene(registry, parent)
 {
-    _mousePos = QPoint(0,0);
-    _commentLayer = new QGraphicsItemLayer();
+    _initialize();
 }
 
 CustomFlowScene::CustomFlowScene(QObject * parent) :
     FlowScene(parent)
 {
-    _mousePos = QPoint(0,0);
-    _commentLayer = new QGraphicsItemLayer();
+    _initialize();
 }
 
 CustomFlowScene::~CustomFlowScene()
 {
+    delete _commentLayer;
+}
 
+void CustomFlowScene::_initialize()
+{
+    _mousePos = QPoint(0,0);
+    _commentLayer = new QGraphicsItemLayer();
+
+    connect(this, &FlowScene::nodeDoubleClicked, this, &CustomFlowScene::showNode);
+    connect(this, &FlowScene::nodeCreated, this, &CustomFlowScene::initNode);
 }
 
 void CustomFlowScene::keyPressEvent(QKeyEvent *event)
@@ -64,6 +74,38 @@ void CustomFlowScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     _mousePos = event->scenePos();
     FlowScene::mouseMoveEvent(event);
+}
+
+void CustomFlowScene::showNode(QtNodes::Node& node)
+{
+    // is a system node ?
+    NodeSparkSystem* systemNode = dynamic_cast<NodeSparkSystem*>(node.nodeDataModel());
+    if(systemNode)
+    {
+        if(systemNode->getResult().get() != nullptr)
+        {
+           GplayDevice::getInstance()->setCurentParticleSystem(systemNode->getResult());
+        }
+
+        return;
+    }
+
+    // is a Path node ?
+    NodePath* pathNode = dynamic_cast<NodePath*>(node.nodeDataModel());
+    if(pathNode)
+    {
+        if(pathNode->getResult() != nullptr)
+        {
+            Q_EMIT showPathNodeRequest(pathNode);
+        }
+        return;
+    }
+}
+
+void CustomFlowScene::initNode(QtNodes::Node& node)
+{
+    BaseNode* baseNode = dynamic_cast<BaseNode*>(node.nodeDataModel());
+    baseNode->init();
 }
 
 eCommentItem* CustomFlowScene::_addComment(const QPointF &pos)
