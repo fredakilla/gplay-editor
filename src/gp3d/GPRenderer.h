@@ -34,6 +34,8 @@ public:
     void onMouseEvent(EventDataRef eventData);
     void onKeyEvent(EventDataRef eventData);
 
+    Scene* getScene() { return _scene; }
+
 protected:
     Scene* _scene;
     FirstPersonCamera _fpCamera;

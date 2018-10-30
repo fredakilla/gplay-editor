@@ -33,8 +33,10 @@ void GplayDeviceGame::createRenderWindow(void* hwnd)
     View::create(0, Rectangle(200, 200), View::ClearFlags::COLOR_DEPTH, 0x556677ff, 1.0f, 0);
 
 
-    _curentSubRenderer = new SpkRenderer();
+    SpkRenderer* spkRenderer = new SpkRenderer();
+    _curentSubRenderer = spkRenderer;
     _inGameEditor = new InGameEditor();
+    _inGameEditor->setScene(spkRenderer->getScene());
 }
 
 void GplayDeviceGame::runFrame()

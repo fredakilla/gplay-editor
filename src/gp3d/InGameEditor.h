@@ -12,6 +12,11 @@ public:
     void resize(int width, int height) override;
     void update(float elapsedTime) override;
     void render(float elapsedTime) override;
+
+    void setScene(Scene* scene);
+
+private:
+    Scene* _scene;
 };
 
 #endif // INGAMEEDITOR_H

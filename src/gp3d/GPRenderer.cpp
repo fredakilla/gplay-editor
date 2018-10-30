@@ -1,7 +1,8 @@
 #include "GPRenderer.h"
 #include "helpers/Events.h"
 
-GPRenderer3D::GPRenderer3D()
+GPRenderer3D::GPRenderer3D() :
+    _scene(nullptr)
 {
     // Create a new empty scene.
     _scene = Scene::create();
