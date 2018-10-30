@@ -160,15 +160,6 @@ void SpkRenderer::update(float elapsedTime)
 
 void SpkRenderer::render(float elapsedTime)
 {
-    // Create some ImGui controls to manage cube rotation
-    static float axis[] = { 0.2f, 0.4f, 0.3f };
-    static float speed = { 0.5f };
-    ImGui::SetNextWindowSize(ImVec2(200,200), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Cube Controls");
-    ImGui::SliderFloat3("Axis", axis, 0.0f, 1.0f);
-    ImGui::SliderFloat("Speed", &speed, -10.0f, 10.0f);
-    ImGui::End();
-
     View::getView(0)->bind();
     _scene->visit(this, &SpkRenderer::drawScene);
 }

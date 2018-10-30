@@ -8,6 +8,10 @@
 ISubRenderer* _curentSubRenderer;
 
 
+#include "gp3d/InGameEditor.h"
+InGameEditor* _inGameEditor;
+
+
 GplayDeviceGame::GplayDeviceGame() :
     _platform(nullptr)
 {
@@ -30,6 +34,7 @@ void GplayDeviceGame::createRenderWindow(void* hwnd)
 
 
     _curentSubRenderer = new SpkRenderer();
+    _inGameEditor = new InGameEditor();
 }
 
 void GplayDeviceGame::runFrame()
@@ -107,6 +112,8 @@ void GplayDeviceGame::update(float elapsedTime)
 void GplayDeviceGame::render(float elapsedTime)
 {
     bgfx::touch(0);
+
+    _inGameEditor->render(elapsedTime);
 
     _curentSubRenderer->render(elapsedTime);
 }
