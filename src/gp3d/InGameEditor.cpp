@@ -4,7 +4,9 @@
 inline void visitNode(Node* node);
 inline void visitScene(Scene* scene);
 inline void setNodeToHierarchyTree(Node* node);
-
+Node* _treeHierarchySelectedNode = nullptr;
+int _treeHierarchySelectionMask = 0;
+int _treeHierarchyItemCount = 0;
 
 
 InGameEditor::InGameEditor()
@@ -47,8 +49,8 @@ void InGameEditor::update(float elapsedTime)
 
 void InGameEditor::render(float elapsedTime)
 {
-    //ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-    //ImGui::ShowTestWindow();
+    ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
+    ImGui::ShowTestWindow();
 
    /* // Create some ImGui controls to manage cube rotation
     static float axis[] = { 0.2f, 0.4f, 0.3f };
@@ -66,15 +68,72 @@ void InGameEditor::render(float elapsedTime)
     ImGui::Begin("Scene Hierarchy");
     if(_scene)
     {
+        // reset selection mask and item count
+        _treeHierarchySelectionMask = 0;
+        _treeHierarchyItemCount = 0;
+
+        // set default scene name if empty
         const char* sceneName = _scene->getId();
         if(strlen(sceneName) == 0)
             sceneName = "unnamed_scene";
 
-        if(ImGui::TreeNode(sceneName))
+        ImGui::Text("Selected node :");
+        bool isCreateNodeClicked = ImGui::Button("Create Node");
+        bool isDeleteNodeClicked = ImGui::Button("Delete Node");
+
+
+        ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Always);
+        bool isRootOpen = ImGui::TreeNodeEx(sceneName);
+        bool isRootClicked = ImGui::IsItemClicked();
+        if(isRootOpen)
         {
             visitScene(_scene);
             ImGui::TreePop();
         }
+
+        if(isRootClicked)
+        {
+            print("Scene is clicked\n");
+            _treeHierarchySelectedNode = nullptr;
+
+            // clear selection
+            _treeHierarchySelectionMask = 0;
+        }
+
+        // create node ?
+        if(isCreateNodeClicked)
+        {
+            Node* node = Node::create();
+
+            if(_treeHierarchySelectedNode)
+            {
+                // add the new node as child of the selected node
+                _treeHierarchySelectedNode->addChild(node);
+            }
+            else
+            {
+                // add the new node to scene root
+                _scene->addNode(node);
+            }
+        }
+
+        // delete node ?
+        if(isDeleteNodeClicked)
+        {
+            if(_treeHierarchySelectedNode)
+            {
+                // remove current selected node
+
+                _treeHierarchySelectedNode->removeAllChildren();
+                _scene->removeNode(_treeHierarchySelectedNode);
+            }
+
+            // clear selection
+            _treeHierarchySelectionMask = 0;
+            _treeHierarchySelectedNode = nullptr;
+        }
+
+
     }
     ImGui::End();
 
@@ -84,12 +143,18 @@ void InGameEditor::render(float elapsedTime)
 
 inline void setNodeToHierarchyTree(Node* node)
 {
+    _treeHierarchyItemCount++;
+
     ImGuiTreeNodeFlags flags = 0
             | ImGuiTreeNodeFlags_OpenOnArrow
             | ImGuiTreeNodeFlags_OpenOnDoubleClick
             | ImGuiTreeNodeFlags_DefaultOpen
             | ImGuiTreeNodeFlags_NoTreePushOnOpen
+            | ((_treeHierarchySelectionMask & (1 << _treeHierarchyItemCount)) ? ImGuiTreeNodeFlags_Selected : 0)
             ;
+
+    if(node == _treeHierarchySelectedNode)
+        flags |= ImGuiTreeNodeFlags_Selected;
 
     bool hasChilds = node->getChildCount() > 0;
     if(!hasChilds)
@@ -107,6 +172,10 @@ inline void setNodeToHierarchyTree(Node* node)
     if (ImGui::IsItemClicked())
     {
         print("Item %s is clicked [0x%x]\n", nodeName, node);
+        _treeHierarchySelectedNode = node;
+
+        // update selection
+        _treeHierarchySelectionMask = (1 << _treeHierarchyItemCount);
     }
 
     if(hasChilds && open)
