@@ -1,4 +1,5 @@
 #include "InGameEditor.h"
+#include "uuid.h"
 
 // used by the hierarchy window
 inline void visitNode(Node* node);
@@ -7,6 +8,14 @@ inline void setNodeToHierarchyTree(Node* node);
 Node* _treeHierarchySelectedNode = nullptr;
 int _treeHierarchySelectionMask = 0;
 int _treeHierarchyItemCount = 0;
+
+enum TreeNodeAction
+{
+    TreeNodeAction_None,
+    TreeNodeAction_Create,
+    TreeNodeAction_Delete
+};
+TreeNodeAction _treeNodeAction = TreeNodeAction_None;
 
 
 InGameEditor::InGameEditor()
@@ -71,39 +80,83 @@ void InGameEditor::render(float elapsedTime)
         // reset selection mask and item count
         _treeHierarchySelectionMask = 0;
         _treeHierarchyItemCount = 0;
+        _treeNodeAction = TreeNodeAction_None;
+        bool isCreateNodeClicked = false;
+        bool isDeleteNodeClicked  = false;
+
 
         // set default scene name if empty
         const char* sceneName = _scene->getId();
         if(strlen(sceneName) == 0)
             sceneName = "unnamed_scene";
 
-        ImGui::Text("Selected node :");
-        bool isCreateNodeClicked = ImGui::Button("Create Node");
-        bool isDeleteNodeClicked = ImGui::Button("Delete Node");
+        ImGui::Text("Selected node :"); ImGui::SameLine();
+        isCreateNodeClicked = ImGui::Button("Create Node"); ImGui::SameLine();
+        isDeleteNodeClicked = ImGui::Button("Delete Node");
 
 
         ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Always);
         bool isRootOpen = ImGui::TreeNodeEx(sceneName);
         bool isRootClicked = ImGui::IsItemClicked();
+
+        ImGui::PushID("scene_root");
+        if (ImGui::BeginPopupContextItem("item context menu"))
+        {
+            if (ImGui::Selectable("Create node")) _treeNodeAction = TreeNodeAction_Create;
+            ImGui::EndPopup();
+
+            print("Scene is clicked\n");
+            _treeHierarchySelectedNode = nullptr;
+
+            // clear selection
+            _treeHierarchySelectionMask = 0;
+
+        }
+        ImGui::PopID();
+
+
+
         if(isRootOpen)
         {
             visitScene(_scene);
             ImGui::TreePop();
         }
 
-        if(isRootClicked)
+        /*if(isRootClicked)
         {
             print("Scene is clicked\n");
             _treeHierarchySelectedNode = nullptr;
 
             // clear selection
             _treeHierarchySelectionMask = 0;
+        }*/
+
+
+
+
+
+        switch(_treeNodeAction)
+        {
+        case TreeNodeAction_Create:
+            isCreateNodeClicked = true;
+            break;
+
+        case TreeNodeAction_Delete:
+            isDeleteNodeClicked = true;
+            break;
+
+        case TreeNodeAction_None:
+        default:
+            break;
         }
+
 
         // create node ?
         if(isCreateNodeClicked)
         {
-            Node* node = Node::create();
+            std::string s = "Node_";
+            s.append(UUID::generateUUID());
+            Node* node = Node::create(s.c_str());
 
             if(_treeHierarchySelectedNode)
             {
@@ -177,6 +230,28 @@ inline void setNodeToHierarchyTree(Node* node)
         // update selection
         _treeHierarchySelectionMask = (1 << _treeHierarchyItemCount);
     }
+
+
+
+    // make unique id for context popup based on node name
+    std::string uniqueId = nodeName + std::to_string(_treeHierarchyItemCount);
+
+    ImGui::PushID(uniqueId.c_str());
+    if (ImGui::BeginPopupContextItem("item context menu"))
+    {
+        if (ImGui::Selectable("Create child node")) _treeNodeAction = TreeNodeAction_Create;
+        if (ImGui::Selectable("Delete node")) _treeNodeAction = TreeNodeAction_Delete;
+        ImGui::EndPopup();
+
+        print("Item %s is clicked [0x%x]\n", nodeName, node);
+        _treeHierarchySelectedNode = node;
+
+        // update selection
+        _treeHierarchySelectionMask = (1 << _treeHierarchyItemCount);
+
+    }
+    ImGui::PopID();
+
 
     if(hasChilds && open)
     {
