@@ -16,6 +16,9 @@ public:
     void setScene(Scene* scene);
 
 private:
+    bool fillTreeScene(Node* node);
+
+private:
     Scene* _scene;
 };
 

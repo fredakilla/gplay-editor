@@ -32,6 +32,9 @@ void InGameEditor::render(float elapsedTime)
     ImGui::End();
 
 
+
+
+
     ImGui::Begin("Scene Hierarchy");
     if(_scene)
     {
@@ -39,24 +42,10 @@ void InGameEditor::render(float elapsedTime)
         if(strlen(sceneName) == 0)
             sceneName = "unnamed_scene";
 
-        ImGui::TreeNode(sceneName);
-
-        int id = 0;
-        for (Node* node = _scene->getFirstNode(); node != nullptr; node = node->getNextSibling(), id++)
+        if(ImGui::TreeNode(sceneName))
         {
-            ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow
-                    | ImGuiTreeNodeFlags_OpenOnDoubleClick
-                    | ImGuiTreeNodeFlags_Leaf
-                    | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-
-            ImGui::TreeNodeEx((void*)(intptr_t)id, node_flags, node->getId(), id);
-
-            for (Node* child = node->getFirstChild(); child != nullptr; child = child->getNextSibling(), id++)
-            {
-                ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                        ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-                ImGui::TreeNodeEx((void*)(intptr_t)id, node_flags, child->getId(), id);
-            }
+            _scene->visit(this, &InGameEditor::fillTreeScene);
+            ImGui::TreePop();
         }
     }
     ImGui::End();
@@ -65,3 +54,18 @@ void InGameEditor::render(float elapsedTime)
     ImGui::ShowTestWindow();
 }
 
+bool InGameEditor::fillTreeScene(Node* node)
+{
+    bool hasChilds = node->getChildCount() > 0;
+
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+    if(!hasChilds)
+        flags |= ImGuiTreeNodeFlags_Leaf;
+
+    if(ImGui::TreeNodeEx(node->getId(), flags))
+    {
+        ImGui::TreePop();
+    }
+
+    return true;
+}
