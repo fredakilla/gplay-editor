@@ -3,6 +3,112 @@
 
 namespace inGameEditor {
 
+class NodeInspector
+{
+private:
+
+
+
+public:
+    NodeInspector()
+    {
+
+    }
+
+    void run(Node* node)
+    {
+
+        ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(300, 0), ImGuiCond_FirstUseEver);
+
+        ImGui::Begin("Node Inspector");
+
+        if(node)
+        {
+            // enabled
+            {
+                static bool enabled = true;
+                enabled = node->isEnabled();
+                if(ImGui::Checkbox("Enabled", &enabled))
+                    node->setEnabled(enabled);
+            }
+
+            // name
+            {
+                static char str0[128] = "coucou";
+                ImGui::InputText("Name", str0, IM_ARRAYSIZE(str0));
+            }
+
+            ImGui::Separator();
+            ImGui::Text("Transformation");
+
+            // reset button
+            {
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.6f, 0.6f));
+                if(ImGui::SmallButton("Reset"))
+                    node->setIdentity();
+                ImGui::PopStyleColor();
+            }
+
+            // node translation
+            {
+                static float pos[] = { 0.0f, 0.0f, 0.0f };
+                pos[0] = node->getTranslationX();
+                pos[1] = node->getTranslationY();
+                pos[2] = node->getTranslationZ();
+                if(ImGui::DragFloat3("Position", pos, 0.025f))
+                    node->setTranslation(pos[0], pos[1], pos[2]);
+            }
+
+            // node rotation
+            {
+                static float rot[] = { 0.0f, 0.0f, 0.0f };
+
+                Quaternion rotation;
+                node->getRotation(&rotation);
+
+                //rotation.computeEuler(&rot[0], &rot[1], &rot[2]);
+
+                if(ImGui::DragFloat3("Rotation", rot, 0.025f))
+                {
+                    Quaternion q;
+                    Quaternion::createFromEuler(rot[0], rot[1], rot[2], &q);
+                    node->setRotation(q);
+                }
+
+            }
+
+            // node scale
+            {
+                static float scale[] = { 0.0f, 0.0f, 0.0f };
+                scale[0] = node->getScaleX();
+                scale[1] = node->getScaleY();
+                scale[2] = node->getScaleZ();
+                if(ImGui::DragFloat3("Scale", scale, 0.025f))
+                    node->setScale(scale[0], scale[1], scale[2]);
+            }
+
+
+            // tag
+            {
+
+            }
+
+
+
+        }
+
+        ImGui::End();
+    }
+
+
+};
+
+
+
+
+
 class SceneHierarchy
 {
     enum TreeNodeAction
@@ -25,6 +131,11 @@ public:
         _treeViewSelectionMask = 0;
         _treeViewItemCount = 0;
         _treeNodeAction = TreeNodeAction_None;
+    }
+
+    Node* getSelectedNode()
+    {
+        return _treeViewSelectedNode;
     }
 
     void run(Scene* scene)
@@ -255,6 +366,7 @@ private:
 
 
 static inGameEditor::SceneHierarchy _sceneHierarchy;
+static inGameEditor::NodeInspector _nodeInspector;
 
 
 InGameEditor::InGameEditor()
@@ -302,6 +414,10 @@ void InGameEditor::render(float elapsedTime)
 
     // show scene hierarchy window
     _sceneHierarchy.run(_scene);
+
+    // show inspector window
+   _nodeInspector.run(_sceneHierarchy.getSelectedNode());
+
 }
 
 
