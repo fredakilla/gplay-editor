@@ -7,7 +7,26 @@ class NodeInspector
 {
 private:
 
+    struct TransformValues
+    {
+        float translation[3];
+        float rotation[3];
+        float scale[3];
 
+        TransformValues()
+        {
+            reset();
+        }
+
+        void reset()
+        {
+            translation[0] = translation[1] = translation[2] = 0.0f;
+            rotation[0] = rotation[1] = rotation[2] = 0.0f;
+            scale[0] = scale[1] = scale[2] = 1.0f;
+        }
+    };
+
+    std::map<Node*, TransformValues> _transformMap;
 
 public:
     NodeInspector()
@@ -25,6 +44,10 @@ public:
 
         if(node)
         {
+            // if this is the first time we see this node in map, map node with a new TransformValues
+            if(_transformMap.count(node) == 0)
+               _transformMap[node] = TransformValues();
+
             // enabled
             {
                 static bool enabled = true;
@@ -47,9 +70,48 @@ public:
                 ImGui::SameLine();
                 ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.6f, 0.6f));
                 if(ImGui::SmallButton("Reset"))
+                {
+                    TransformValues& transformValues = _transformMap[node];
+                    transformValues.reset();
+
                     node->setIdentity();
+                }
                 ImGui::PopStyleColor();
             }
+
+            // transform
+            {
+                /*static float translation[] = { 0.0f, 0.0f, 0.0f };
+                static float rotation[] = { 0.0f, 0.0f, 0.0f };
+                static float scale[] = { 1.0f, 1.0f, 1.0f };*/
+                TransformValues& transformValues = _transformMap[node];
+
+                bool isTranslationUpdated = false;
+                bool isRotationUpdated = false;
+                bool isScaleUpdated = false;
+
+                if(ImGui::DragFloat3("Translation", transformValues.translation, 0.025f)) isTranslationUpdated = true;
+                if(ImGui::DragFloat3("Rotation", transformValues.rotation, 0.025f)) isRotationUpdated = true;
+                if(ImGui::DragFloat3("Scale", transformValues.scale, 0.025f)) isScaleUpdated = true;
+
+                if(isScaleUpdated || isRotationUpdated || isTranslationUpdated)
+                {
+                    Vector3 s(transformValues.scale);
+                    Vector3 t(transformValues.translation);
+                    Quaternion r;
+
+                    //Quaternion::createFromEuler(rotation[0], rotation[1], rotation[2], &r);
+
+                    Matrix m;
+                    Matrix::createFromEuler(transformValues.rotation[1], transformValues.rotation[0], transformValues.rotation[2], &m);
+                    Quaternion::createFromRotationMatrix(m, &r);
+
+                    Transform transform(s,r,t);
+                    node->set(transform);
+                }
+            }
+
+#if 0
 
             // node translation
             {
@@ -63,19 +125,42 @@ public:
 
             // node rotation
             {
+
                 static float rot[] = { 0.0f, 0.0f, 0.0f };
 
-                Quaternion rotation;
-                node->getRotation(&rotation);
-
-                //rotation.computeEuler(&rot[0], &rot[1], &rot[2]);
-
-                if(ImGui::DragFloat3("Rotation", rot, 0.025f))
+                // method 1 - from axis and angle
                 {
-                    Quaternion q;
-                    Quaternion::createFromEuler(rot[0], rot[1], rot[2], &q);
-                    node->setRotation(q);
+                    Vector3 rotation;
+                    float angle = node->getRotation(&rotation);
+                    rotation *= angle;
+
+                    rot[0] = rotation.x;
+                    rot[1] = rotation.y;
+                    rot[2] = rotation.z;
+
+                    if(ImGui::DragFloat3("Rotation", rot, 0.025f))
+                    {
+                        rotation = Vector3(&rot[0]);
+                        angle = rotation.length();
+                        rotation.normalize();
+                        node->setRotation(rotation, angle);
+                    }
                 }
+
+
+                // method 2 - from euler
+               /* {
+                    Quaternion rotation;
+                    node->getRotation(&rotation);
+                    rotation.computeEuler(&rot[0], &rot[1], &rot[2]);
+
+                    if(ImGui::DragFloat3("Rotation", rot, 0.025f))
+                    {
+                        Quaternion q;
+                        Quaternion::createFromEuler(rot[0], rot[1], rot[2], &q);
+                        node->setRotation(q);
+                    }
+                }*/
 
             }
 
@@ -88,6 +173,8 @@ public:
                 if(ImGui::DragFloat3("Scale", scale, 0.025f))
                     node->setScale(scale[0], scale[1], scale[2]);
             }
+
+#endif
 
 
             // tag
