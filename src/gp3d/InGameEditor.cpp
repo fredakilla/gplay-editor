@@ -61,20 +61,23 @@ public:
                transformValues.translation[0] = t.x;
                transformValues.translation[1] = t.y;
                transformValues.translation[2] = t.z;
+
                transformValues.scale[0] = s.x;
                transformValues.scale[1] = s.y;
                transformValues.scale[2] = s.z;
 
-               float yaw, pitch, roll = 0.0f;
-               r.computeEuler(&yaw, &pitch, &roll);
-               transformValues.rotation[0] = yaw;
-               transformValues.rotation[1] = pitch;
-               transformValues.rotation[2] = roll;
+               // method 1 - get euler rotation from quaternion
+               Vector3 euler;
+               r.toEulerAngles(&euler);
+               transformValues.rotation[0] = euler.x;   // roll
+               transformValues.rotation[1] = euler.y;   // pitch
+               transformValues.rotation[2] = euler.z;   // yaw
 
+               // method 2 - get euler rotation from matrix
                /*Vector3 euler = matrix.getEulerAngles();
-               transformValues.rotation[0] = MATH_DEG_TO_RAD(euler.x);
-               transformValues.rotation[1] = MATH_DEG_TO_RAD(euler.y);
-               transformValues.rotation[2] = MATH_DEG_TO_RAD(euler.z);*/
+               transformValues.rotation[0] = euler.x;
+               transformValues.rotation[1] = euler.y;
+               transformValues.rotation[2] = euler.z;*/
 
             }
 
@@ -121,7 +124,7 @@ public:
                 bool isScaleUpdated = false;
 
                 if(ImGui::DragFloat3("Translation", transformValues.translation, 0.025f)) isTranslationUpdated = true;
-                if(ImGui::DragFloat3("Rotation", transformValues.rotation, 0.025f)) isRotationUpdated = true;
+                if(ImGui::DragFloat3("Rotation", transformValues.rotation, 1.0f)) isRotationUpdated = true;
                 if(ImGui::DragFloat3("Scale", transformValues.scale, 0.025f)) isScaleUpdated = true;
 
                 if(isScaleUpdated || isRotationUpdated || isTranslationUpdated)
@@ -130,11 +133,25 @@ public:
                     Vector3 t(transformValues.translation);
                     Quaternion r;
 
-                    //Quaternion::createFromEuler(rotation[0], rotation[1], rotation[2], &r);
+                    // create rotation from euler and quaternion
+                    Quaternion::createFromEulerAngles(
+                                Vector3(
+                                transformValues.rotation[0],
+                                transformValues.rotation[1],
+                                transformValues.rotation[2]),
+                            &r);
 
-                    Matrix m;
-                    Matrix::createFromEuler(transformValues.rotation[1], transformValues.rotation[0], transformValues.rotation[2], &m);
-                    Quaternion::createFromRotationMatrix(m, &r);
+
+                    // create rotation from euler and matrix
+                    // BUGGED
+                    //Matrix m;
+                    //Matrix::createFromEuler(
+                    //        MATH_DEG_TO_RAD(transformValues.rotation[2]),
+                    //        MATH_DEG_TO_RAD(transformValues.rotation[1]),
+                    //        MATH_DEG_TO_RAD(transformValues.rotation[0]),
+                    //        &m);
+                    //Quaternion::createFromRotationMatrix(m, &r);
+
 
                     Transform transform(s,r,t);
                     node->set(transform);
@@ -530,7 +547,7 @@ void InGameEditor::setScene(Scene* scene)
     //nodeBox->setRotation(Vector3(-0.2,4,1.456), MATH_DEG_TO_RAD(25));
 
     Quaternion q;
-    Quaternion::createFromEuler(2,3,1,&q);
+    Quaternion::createFromEulerAngles(Vector3(25,-42,126), &q);
     nodeBox->setRotation(q);
 
     SAFE_RELEASE(nodeBox);
