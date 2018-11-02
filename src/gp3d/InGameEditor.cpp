@@ -44,9 +44,39 @@ public:
 
         if(node)
         {
-            // if this is the first time we see this node in map, map node with a new TransformValues
+            // if this is the first time we see this node in map
+            // get original node transformation and map with editor TransformValues.
             if(_transformMap.count(node) == 0)
+            {
+                const Matrix& matrix = node->getMatrix();
+
+                Vector3 s,t;
+                Quaternion r;
+                matrix.decompose(&s,&r,&t);
+
                _transformMap[node] = TransformValues();
+
+               TransformValues& transformValues = _transformMap[node];
+
+               transformValues.translation[0] = t.x;
+               transformValues.translation[1] = t.y;
+               transformValues.translation[2] = t.z;
+               transformValues.scale[0] = s.x;
+               transformValues.scale[1] = s.y;
+               transformValues.scale[2] = s.z;
+
+               float yaw, pitch, roll = 0.0f;
+               r.computeEuler(&yaw, &pitch, &roll);
+               transformValues.rotation[0] = yaw;
+               transformValues.rotation[1] = pitch;
+               transformValues.rotation[2] = roll;
+
+               /*Vector3 euler = matrix.getEulerAngles();
+               transformValues.rotation[0] = MATH_DEG_TO_RAD(euler.x);
+               transformValues.rotation[1] = MATH_DEG_TO_RAD(euler.y);
+               transformValues.rotation[2] = MATH_DEG_TO_RAD(euler.z);*/
+
+            }
 
             // enabled
             {
@@ -482,6 +512,28 @@ void InGameEditor::setScene(Scene* scene)
     _scene->addNode(n2);
     _scene->addNode(n6);
     _scene->addNode();
+
+
+
+    // test model
+
+    Bundle* bundle = Bundle::create("res/data/scenes/box.gpb");
+    Model* modelBox = Model::create(bundle->loadMesh("box_Mesh"));
+    modelBox->setMaterial("res/data/materials/box.material");
+    Node* nodeBox = Node::create("nodeBox");
+    nodeBox->setDrawable(modelBox);
+    SAFE_RELEASE(modelBox);
+    _scene->addNode(nodeBox);
+
+    nodeBox->setScale(2,1,3);
+    nodeBox->setTranslation(1,2,-3);
+    //nodeBox->setRotation(Vector3(-0.2,4,1.456), MATH_DEG_TO_RAD(25));
+
+    Quaternion q;
+    Quaternion::createFromEuler(2,3,1,&q);
+    nodeBox->setRotation(q);
+
+    SAFE_RELEASE(nodeBox);
 }
 
 void InGameEditor::resize(int width, int height)
