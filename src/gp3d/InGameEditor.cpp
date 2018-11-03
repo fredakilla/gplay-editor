@@ -1,8 +1,39 @@
 #include "InGameEditor.h"
-#include "uuid.h"
+#include <gplay-engine.h>
+#include <thirdparty/imgui/imgui.h>
 
-namespace inGameEditor {
+using namespace gplay;
 
+namespace gpeditor {
+
+/**
+ * UUID generator
+ * https://gist.github.com/fernandomv3/46a6d7656f50ee8d39dc
+ */
+static const std::string CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+static std::string __generateUUID()
+{
+    std::string uuid = std::string(36,' ');
+    int rnd = 0;
+
+    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+    uuid[14] = '4';
+
+    for(int i=0; i<36; i++) {
+        if (i != 8 && i != 13 && i != 18 && i != 14 && i != 23) {
+            if (rnd <= 0x02) {
+                rnd = 0x2000000 + (std::rand() * 0x1000000) | 0;
+            }
+            rnd >>= 4;
+            uuid[i] = CHARS[(i == 19) ? ((rnd & 0xf) & 0x3) | 0x8 : rnd & 0xf];
+        }
+    }
+    return uuid;
+}
+
+/**
+ * Inspector Window
+ */
 class NodeInspector
 {
 private:
@@ -36,7 +67,6 @@ public:
 
     void run(Node* node)
     {
-
         ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(ImVec2(300, 0), ImGuiCond_FirstUseEver);
 
@@ -81,18 +111,18 @@ public:
 
             }
 
+            // name
+            {
+                static char str0[128] = "coucou";
+                ImGui::InputText("Name", str0, IM_ARRAYSIZE(str0));
+            }
+
             // enabled
             {
                 static bool enabled = true;
                 enabled = node->isEnabled();
                 if(ImGui::Checkbox("Enabled", &enabled))
                     node->setEnabled(enabled);
-            }
-
-            // name
-            {
-                static char str0[128] = "coucou";
-                ImGui::InputText("Name", str0, IM_ARRAYSIZE(str0));
             }
 
             ImGui::Separator();
@@ -114,9 +144,6 @@ public:
 
             // transform
             {
-                /*static float translation[] = { 0.0f, 0.0f, 0.0f };
-                static float rotation[] = { 0.0f, 0.0f, 0.0f };
-                static float scale[] = { 1.0f, 1.0f, 1.0f };*/
                 TransformValues& transformValues = _transformMap[node];
 
                 bool isTranslationUpdated = false;
@@ -152,97 +179,28 @@ public:
                     //        &m);
                     //Quaternion::createFromRotationMatrix(m, &r);
 
-
                     Transform transform(s,r,t);
                     node->set(transform);
                 }
             }
 
-#if 0
-
-            // node translation
-            {
-                static float pos[] = { 0.0f, 0.0f, 0.0f };
-                pos[0] = node->getTranslationX();
-                pos[1] = node->getTranslationY();
-                pos[2] = node->getTranslationZ();
-                if(ImGui::DragFloat3("Position", pos, 0.025f))
-                    node->setTranslation(pos[0], pos[1], pos[2]);
-            }
-
-            // node rotation
-            {
-
-                static float rot[] = { 0.0f, 0.0f, 0.0f };
-
-                // method 1 - from axis and angle
-                {
-                    Vector3 rotation;
-                    float angle = node->getRotation(&rotation);
-                    rotation *= angle;
-
-                    rot[0] = rotation.x;
-                    rot[1] = rotation.y;
-                    rot[2] = rotation.z;
-
-                    if(ImGui::DragFloat3("Rotation", rot, 0.025f))
-                    {
-                        rotation = Vector3(&rot[0]);
-                        angle = rotation.length();
-                        rotation.normalize();
-                        node->setRotation(rotation, angle);
-                    }
-                }
-
-
-                // method 2 - from euler
-               /* {
-                    Quaternion rotation;
-                    node->getRotation(&rotation);
-                    rotation.computeEuler(&rot[0], &rot[1], &rot[2]);
-
-                    if(ImGui::DragFloat3("Rotation", rot, 0.025f))
-                    {
-                        Quaternion q;
-                        Quaternion::createFromEuler(rot[0], rot[1], rot[2], &q);
-                        node->setRotation(q);
-                    }
-                }*/
-
-            }
-
-            // node scale
-            {
-                static float scale[] = { 0.0f, 0.0f, 0.0f };
-                scale[0] = node->getScaleX();
-                scale[1] = node->getScaleY();
-                scale[2] = node->getScaleZ();
-                if(ImGui::DragFloat3("Scale", scale, 0.025f))
-                    node->setScale(scale[0], scale[1], scale[2]);
-            }
-
-#endif
-
-
-            // tag
+            // tags
             {
 
             }
-
-
 
         }
 
         ImGui::End();
     }
-
-
 };
 
 
 
-
-
+/**
+ * Scene Hierarchy window
+ *
+ */
 class SceneHierarchy
 {
     enum TreeNodeAction
@@ -455,7 +413,7 @@ private:
     void _createChildNode(Node* parent, Scene* scene)
     {
         std::string s = "Node_";
-        s.append(UUID::generateUUID());
+        s.append(__generateUUID());
         Node* node = Node::create(s.c_str());
 
         if(parent)
@@ -496,14 +454,25 @@ private:
 
 
 
+//static gpeditor::SceneHierarchy _sceneHierarchy;
+//static gpeditor::NodeInspector _nodeInspector;
+
+using namespace gpeditor;
 
 
+InGameEditor::InGameEditor() :
+    _sceneHierarchy(new gpeditor::SceneHierarchy)
+  , _nodeInspector(new gpeditor::NodeInspector)
+{
+}
 
-static inGameEditor::SceneHierarchy _sceneHierarchy;
-static inGameEditor::NodeInspector _nodeInspector;
+InGameEditor::~InGameEditor()
+{
+    delete _sceneHierarchy;
+    delete _nodeInspector;
+}
 
-
-InGameEditor::InGameEditor()
+void InGameEditor::resize(int width, int height)
 {
 
 }
@@ -553,31 +522,19 @@ void InGameEditor::setScene(Scene* scene)
     SAFE_RELEASE(nodeBox);
 }
 
-void InGameEditor::resize(int width, int height)
-{
-
-}
-
 void InGameEditor::update(float elapsedTime)
 {
+    if(_scene)
+    {
+        ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
+        ImGui::ShowTestWindow();
 
+        // show scene hierarchy window
+        _sceneHierarchy->run(_scene);
+
+        // show inspector window
+        _nodeInspector->run(_sceneHierarchy->getSelectedNode());
+
+    }
 }
-
-void InGameEditor::render(float elapsedTime)
-{
-    ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-    ImGui::ShowTestWindow();
-
-    // show scene hierarchy window
-    _sceneHierarchy.run(_scene);
-
-    // show inspector window
-   _nodeInspector.run(_sceneHierarchy.getSelectedNode());
-
-}
-
-
-
-
-
 

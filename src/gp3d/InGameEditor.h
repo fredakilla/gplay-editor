@@ -1,23 +1,30 @@
 #ifndef INGAMEEDITOR_H
 #define INGAMEEDITOR_H
 
-#include "GPRenderer.h"
-#include <thirdparty/imgui/imgui.h>
+namespace gpeditor {
+class SceneHierarchy;
+class NodeInspector;
+}
 
-class InGameEditor : public ISubRenderer
+namespace gplay {
+
+class Scene;
+
+class InGameEditor
 {
 public:
     InGameEditor();
-
-    void resize(int width, int height) override;
-    void update(float elapsedTime) override;
-    void render(float elapsedTime) override;
-
+    ~InGameEditor();
+    void resize(int width, int height);
+    void update(float elapsedTime);
     void setScene(Scene* scene);
-
 
 private:
     Scene* _scene;
+    gpeditor::SceneHierarchy* _sceneHierarchy;
+    gpeditor::NodeInspector* _nodeInspector;
 };
+
+}
 
 #endif // INGAMEEDITOR_H

@@ -108,18 +108,15 @@ void GplayDeviceGame::finalize()
 
 void GplayDeviceGame::update(float elapsedTime)
 {
+    _inGameEditor->update(elapsedTime);
     _curentSubRenderer->update(elapsedTime);
 }
 
 void GplayDeviceGame::render(float elapsedTime)
 {
     bgfx::touch(0);
-
-    _inGameEditor->render(elapsedTime);
-
     _curentSubRenderer->render(elapsedTime);
 }
-
 
 void GplayDeviceGame::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
 {

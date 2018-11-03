@@ -118,8 +118,7 @@ HEADERS += \
     src/GplayDevice.h \
     src/node-editor/spark-nodes/SpkRenderer.h \
     src/node-editor/spark-nodes/SpkUtils.h \
-    src/gp3d/InGameEditor.h \
-    src/gp3d/uuid.h
+    src/gp3d/InGameEditor.h
 
 
 
