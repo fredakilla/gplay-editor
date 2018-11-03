@@ -6,10 +6,15 @@ using namespace gplay;
 
 namespace gpeditor {
 
-/**
- * UUID generator
- * https://gist.github.com/fernandomv3/46a6d7656f50ee8d39dc
- */
+
+//-----------------------------------------------------------------------------------------------------------------------
+//
+// UUID generator
+// https://gist.github.com/fernandomv3/46a6d7656f50ee8d39dc
+//
+//-----------------------------------------------------------------------------------------------------------------------
+
+
 static const std::string CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 static std::string __generateUUID()
 {
@@ -31,9 +36,13 @@ static std::string __generateUUID()
     return uuid;
 }
 
-/**
- * Inspector Window
- */
+
+//-----------------------------------------------------------------------------------------------------------------------
+//
+// node Inspector Window
+//
+//-----------------------------------------------------------------------------------------------------------------------
+
 class NodeInspector
 {
 private:
@@ -65,7 +74,7 @@ public:
 
     }
 
-    void run(Node* node)
+    void draw(Node* node)
     {
         ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(ImVec2(300, 0), ImGuiCond_FirstUseEver);
@@ -197,10 +206,12 @@ public:
 
 
 
-/**
- * Scene Hierarchy window
- *
- */
+//-----------------------------------------------------------------------------------------------------------------------
+//
+// Scene Hierarchy window
+//
+//-----------------------------------------------------------------------------------------------------------------------
+
 class SceneHierarchy
 {
     enum TreeNodeAction
@@ -230,7 +241,7 @@ public:
         return _treeViewSelectedNode;
     }
 
-    void run(Scene* scene)
+    void draw(Scene* scene)
     {
         if(!scene)
         {
@@ -450,12 +461,164 @@ private:
 };
 
 
+
+//-----------------------------------------------------------------------------------------------------------------------
+//
+// Log Window (based on ImGui log window example)
+//
+//-----------------------------------------------------------------------------------------------------------------------
+
+struct LogWindow
+{
+    ImGuiTextBuffer     Buf;
+    ImGuiTextFilter     Filter;
+    ImVector<int>       LineOffsets;        // Index to lines offset
+    bool                ScrollToBottom;
+
+    void clear() { Buf.clear(); LineOffsets.clear(); }
+
+    void addLog(std::string text)
+    {
+        int old_size = Buf.size();
+        Buf.appendf("%s\n", text.c_str());
+        for (int new_size = Buf.size(); old_size < new_size; old_size++)
+            if (Buf[old_size] == '\n')
+                LineOffsets.push_back(old_size);
+        ScrollToBottom = true;
+    }
+
+    void draw(const char* title, bool* p_open = NULL)
+    {
+        ImGui::SetNextWindowSize(ImVec2(500,400), ImGuiCond_FirstUseEver);
+        if (!ImGui::Begin(title, p_open))
+        {
+            ImGui::End();
+            return;
+        }
+        if (ImGui::Button("Clear")) clear();
+        ImGui::SameLine();
+        bool copy = ImGui::Button("Copy");
+        ImGui::SameLine();
+        Filter.Draw("Filter", -100.0f);
+        ImGui::Separator();
+        ImGui::BeginChild("scrolling", ImVec2(0,0), false, ImGuiWindowFlags_HorizontalScrollbar);
+        if (copy) ImGui::LogToClipboard();
+
+        if (Filter.IsActive())
+        {
+            const char* buf_begin = Buf.begin();
+            const char* line = buf_begin;
+            for (int line_no = 0; line != NULL; line_no++)
+            {
+                const char* line_end = (line_no < LineOffsets.Size) ? buf_begin + LineOffsets[line_no] : NULL;
+                if (Filter.PassFilter(line, line_end))
+                    ImGui::TextUnformatted(line, line_end);
+                line = line_end && line_end[1] ? line_end + 1 : NULL;
+            }
+        }
+        else
+        {
+            ImGui::TextUnformatted(Buf.begin());
+        }
+
+        if (ScrollToBottom)
+            ImGui::SetScrollHere(1.0f);
+        ScrollToBottom = false;
+        ImGui::EndChild();
+        ImGui::End();
+    }
+};
+
+
+//-----------------------------------------------------------------------------------------------------------------------
+//
+// LogStreamer - Redirect std stream to a log widget
+//
+//-----------------------------------------------------------------------------------------------------------------------
+
+class LogStreamer : public std::basic_streambuf<char>
+{
+public:
+    LogStreamer(std::ostream &stream, LogWindow* logWidget);
+    ~LogStreamer();
+
+protected:
+    virtual int_type overflow(int_type v);
+    virtual std::streamsize xsputn(const char *p, std::streamsize n);
+
+private:
+    std::ostream &_stream;
+    std::streambuf * _old_buf;
+    std::string _string;
+    LogWindow * _logWidget;
+};
+
+
+
+LogStreamer::LogStreamer(std::ostream &stream, LogWindow* logWidget)
+    : _stream(stream)
+{
+    _logWidget = logWidget;
+    _old_buf = stream.rdbuf();
+    stream.rdbuf(this);
+}
+
+LogStreamer::~LogStreamer()
+{
+    // output anything that is left
+    if (!_string.empty())
+        _logWidget->addLog(_string.c_str());
+    _stream.rdbuf(_old_buf);
+}
+
+std::streambuf::int_type LogStreamer::overflow(int_type v)
+{
+    if (v == '\n')
+    {
+        _logWidget->addLog(_string.c_str());
+        _string.erase(_string.begin(), _string.end());
+    }
+    else
+        _string += v;
+
+    return v;
+}
+
+std::streamsize LogStreamer::xsputn(const char *p, std::streamsize n)
+{
+    _string.append(p, p + n);
+
+    std::string::size_type pos = 0;
+    while (pos != std::string::npos && _string.length()>1)
+    {
+        pos = _string.find('\n');
+        if (pos != std::string::npos)
+        {
+            std::string tmp(_string.begin(), _string.begin() + pos);
+            _logWidget->addLog(tmp.c_str());
+            _string.erase(_string.begin(), _string.begin() + pos + 1);
+        }
+    }
+
+    return n;
+}
+
+
 } // end namespace inGameEditor
 
 
 
-//static gpeditor::SceneHierarchy _sceneHierarchy;
-//static gpeditor::NodeInspector _nodeInspector;
+
+
+//-----------------------------------------------------------------------------------------------------------------------
+//
+// InGameEditor impl
+//
+//-----------------------------------------------------------------------------------------------------------------------
+
+
+static gpeditor::LogWindow _logWindow;
+static gpeditor::LogStreamer* _logStream;
 
 using namespace gpeditor;
 
@@ -464,6 +627,7 @@ InGameEditor::InGameEditor() :
     _sceneHierarchy(new gpeditor::SceneHierarchy)
   , _nodeInspector(new gpeditor::NodeInspector)
 {
+    _logStream = new LogStreamer(std::cout, &_logWindow);
 }
 
 InGameEditor::~InGameEditor()
@@ -530,10 +694,13 @@ void InGameEditor::update(float elapsedTime)
         ImGui::ShowTestWindow();
 
         // show scene hierarchy window
-        _sceneHierarchy->run(_scene);
+        _sceneHierarchy->draw(_scene);
 
         // show inspector window
-        _nodeInspector->run(_sceneHierarchy->getSelectedNode());
+        _nodeInspector->draw(_sceneHierarchy->getSelectedNode());
+
+        // show log window
+        _logWindow.draw("Log");
 
     }
 }
