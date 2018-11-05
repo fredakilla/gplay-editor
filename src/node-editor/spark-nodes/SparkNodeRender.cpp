@@ -163,7 +163,7 @@ void SparkNodeRender::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
     SparkParticleEmitter* sparkEffect = SparkParticleEmitter::create(sparkSystem, true);
     Node* sparkNode = Node::create("SparkNode");
     sparkNode->setDrawable(sparkEffect);
-    sparkNode->setTranslation(5.0f, 0.0f, 0.0f);
+    sparkNode->setTranslation(0.0f, 0.0f, 0.0f);
 
     _scene->addNode(sparkNode);
 }
