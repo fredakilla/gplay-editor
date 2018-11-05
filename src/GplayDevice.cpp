@@ -2,14 +2,10 @@
 #include "node-editor/common/BaseNode.h"
 #include "gp3d/QtImGui.h"
 #include "gp3d/helpers/Events.h"
-#include "node-editor/spark-nodes/SpkRenderer.h"
+#include "node-editor/spark-nodes/SparkNodeRender.h"
 #include "gp3d/GPRenderer.h"
 
 ISubRenderer* _curentSubRenderer;
-
-
-#include "gp3d/InGameEditor.h"
-InGameEditor* _inGameEditor;
 
 
 GplayDeviceGame::GplayDeviceGame() :
@@ -33,10 +29,8 @@ void GplayDeviceGame::createRenderWindow(void* hwnd)
     View::create(0, Rectangle(200, 200), View::ClearFlags::COLOR_DEPTH, 0x556677ff, 1.0f, 0);
 
 
-    SpkRenderer* spkRenderer = new SpkRenderer();
+    SparkNodeRender* spkRenderer = new SparkNodeRender();
     _curentSubRenderer = spkRenderer;
-    _inGameEditor = new InGameEditor();
-    _inGameEditor->setScene(spkRenderer->getScene());
 }
 
 void GplayDeviceGame::runFrame()
@@ -109,7 +103,6 @@ void GplayDeviceGame::finalize()
 
 void GplayDeviceGame::update(float elapsedTime)
 {
-    _inGameEditor->update(elapsedTime);
     _curentSubRenderer->update(elapsedTime);
 }
 
@@ -121,7 +114,7 @@ void GplayDeviceGame::render(float elapsedTime)
 
 void GplayDeviceGame::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
 {
-    SpkRenderer* _spkRenderer = dynamic_cast<SpkRenderer*>(_curentSubRenderer);
+    SparkNodeRender* _spkRenderer = dynamic_cast<SparkNodeRender*>(_curentSubRenderer);
     if(_spkRenderer)
         _spkRenderer->setCurentParticleSystem(sparkSystem);
 }

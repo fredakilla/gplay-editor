@@ -1,4 +1,4 @@
-#include "SpkRenderer.h"
+#include "SparkNodeRender.h"
 
 #include <spark/SPARK.h>
 #include <sparkparticles/SparkParticleEmitter.h>
@@ -126,67 +126,54 @@ void drawDebugShapes(SparkParticleEmitter* spkEffect, Scene* scene)
 
 FrameBuffer* _frameBuffer;
 #include <thirdparty/bgfxcommon/imgui/bgfximgui.h>
-Model* _quadModel;
 
-SpkRenderer::SpkRenderer() :
+
+SparkNodeRender::SparkNodeRender() :
     GPRenderer3D(),
     _isShowDebug(true)
 {
 
-   /* Texture* texColor = Texture::create("targetColor", 512, 512, Texture::Format::RGBA, Texture::Type::TEXTURE_RT);
-    std::vector<Texture*> textures;
-    textures.push_back(texColor);
-    _frameBuffer = FrameBuffer::create("myFrameBuffer", textures);
+    // create a framebuffer for scene preview in imgui window
 
-    View::create(1, Rectangle(512, 512), View::ClearFlags::COLOR_DEPTH, 0xaaaaaaff, 1.0f, 0);*/
+    const int frameBufferWidth = 512;
+    const int frameBufferHeight = 512;
 
-
-     View::create(1, Rectangle(512, 512), View::ClearFlags::COLOR_DEPTH, 0x000000ff, 1.0f, 0);
-
-
-#define FRAMEBUFFER_WIDTH 512
-#define FRAMEBUFFER_HEIGHT 512
-
-    Texture* texColor = Texture::create("targetColor", FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, Texture::Format::RGBA, Texture::Type::TEXTURE_RT);
-    Texture* texDepth = Texture::create("targetDepth", FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, Texture::Format::D16, Texture::Type::TEXTURE_RT);
+    Texture* texColor = Texture::create("targetColor", frameBufferWidth, frameBufferHeight, Texture::Format::RGBA, Texture::Type::TEXTURE_RT);
+    Texture* texDepth = Texture::create("targetDepth", frameBufferWidth, frameBufferHeight, Texture::Format::D16, Texture::Type::TEXTURE_RT);
     std::vector<Texture*> textures;
     textures.push_back(texColor);
     textures.push_back(texDepth);
     _frameBuffer = FrameBuffer::create("MyFrameBuffer", textures);
 
+    View::create(1, Rectangle(frameBufferWidth, frameBufferHeight), View::ClearFlags::COLOR_DEPTH, 0x000000ff, 1.0f, 0);
 
 
-
-
-    // Create a quad for framebuffer preview
-    Mesh* mesh = Mesh::createQuad(0,0,256,256);
-    _quadModel = Model::create(mesh);
-    SAFE_RELEASE(mesh);
-    _quadModel->setMaterial("res/core/shaders/debug.vert", "res/core/shaders/debug.frag", "SHOW_TEXTURE");
-    _quadModel->getMaterial()->getParameter("u_texture")->setValue(_frameBuffer->getRenderTarget(0));
+    // show gplay in game editor
+    Game::getInstance()->showEditor(_scene);
 
 }
 
-void SpkRenderer::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
+void SparkNodeRender::setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem)
 {
-    Node* node = _scene->findNode("sparkSystem");
+    Node* node = _scene->findNode("SparkNode");
     if(node)
         _scene->removeNode(node);
 
-    // Create a node in scene and attach spark foutain effect
-    SparkParticleEmitter* foutainEmitter = SparkParticleEmitter::createRef(sparkSystem, true);
-    Node* particleNode = Node::create("sparkSystem");
-    particleNode->setDrawable(foutainEmitter);
-    particleNode->setTranslation(0.0f, 0.0f, 0.0f);
+    // Create a node in scene and attach spark effect
+    SparkParticleEmitter* sparkEffect = SparkParticleEmitter::create(sparkSystem, true);
+    Node* sparkNode = Node::create("SparkNode");
+    sparkNode->setDrawable(sparkEffect);
+    sparkNode->setTranslation(5.0f, 0.0f, 0.0f);
 
-    _scene->addNode(particleNode);
+    _scene->addNode(sparkNode);
 }
 
-void SpkRenderer::update(float elapsedTime)
+void SparkNodeRender::update(float elapsedTime)
 {
     // call super class method
     GPRenderer3D::update(elapsedTime);
 
+    // show framebuffer inside an imgui window
     ImGui::Begin("Game rendering");
     {
         bgfx::TextureHandle th = _frameBuffer->getRenderTarget(0)->getTexture()->getHandle()->getHandle();
@@ -194,22 +181,22 @@ void SpkRenderer::update(float elapsedTime)
     }
     ImGui::End();
 
-    _scene->visit(this, &SpkRenderer::updateEmitters, elapsedTime);
-
+    // update emitters
+    _scene->visit(this, &SparkNodeRender::updateEmitters, elapsedTime);
 }
 
 
-void SpkRenderer::render(float elapsedTime)
+void SparkNodeRender::render(float elapsedTime)
 {
     View::getView(1)->bind();
     _frameBuffer->bind();
-    _scene->visit(this, &SpkRenderer::drawScene);
+    _scene->visit(this, &SparkNodeRender::drawScene);
 
     View::getView(0)->bind();
-   _scene->visit(this, &SpkRenderer::drawScene);
+   _scene->visit(this, &SparkNodeRender::drawScene);
 }
 
-bool SpkRenderer::drawScene(Node* node)
+bool SparkNodeRender::drawScene(Node* node)
 {
     Drawable* drawable = node->getDrawable();
     if (drawable)
@@ -217,7 +204,7 @@ bool SpkRenderer::drawScene(Node* node)
     return true;
 }
 
-bool SpkRenderer::updateEmitters(Node* node, float elapsedTime)
+bool SparkNodeRender::updateEmitters(Node* node, float elapsedTime)
 {
     SparkParticleEmitter* spkEffect = dynamic_cast<SparkParticleEmitter*>(node->getDrawable());
     if (spkEffect)

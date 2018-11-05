@@ -83,9 +83,8 @@ SOURCES += \
     src/gp3d/PlatformQt.cpp \
     src/gp3d/QtImGui.cpp \
     src/GplayDevice.cpp \
-    src/node-editor/spark-nodes/SpkRenderer.cpp \
     src/node-editor/spark-nodes/SpkUtils.cpp \
-    src/gp3d/InGameEditor.cpp
+    src/node-editor/spark-nodes/SparkNodeRender.cpp
 
 HEADERS += \
     src/node-editor/common/BaseNode.h \
@@ -116,9 +115,8 @@ HEADERS += \
     src/gp3d/QtImGui.h \
     src/gp3d/PlatformQt.h \
     src/GplayDevice.h \
-    src/node-editor/spark-nodes/SpkRenderer.h \
     src/node-editor/spark-nodes/SpkUtils.h \
-    src/gp3d/InGameEditor.h
+    src/node-editor/spark-nodes/SparkNodeRender.h
 
 
 

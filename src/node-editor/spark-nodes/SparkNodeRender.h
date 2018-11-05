@@ -4,10 +4,10 @@
 #include "../../gp3d/GPRenderer.h"
 #include <spark/SPARK.h>
 
-class SpkRenderer : public GPRenderer3D
+class SparkNodeRender : public GPRenderer3D
 {
 public:
-    SpkRenderer();
+    SparkNodeRender();
 
     void setCurentParticleSystem(SPK::Ref<SPK::System> sparkSystem);
 
