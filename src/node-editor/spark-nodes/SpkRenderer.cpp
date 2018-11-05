@@ -124,13 +124,46 @@ void drawDebugShapes(SparkParticleEmitter* spkEffect, Scene* scene)
 
 
 
-
-
+FrameBuffer* _frameBuffer;
+#include <thirdparty/bgfxcommon/imgui/bgfximgui.h>
+Model* _quadModel;
 
 SpkRenderer::SpkRenderer() :
     GPRenderer3D(),
     _isShowDebug(true)
 {
+
+   /* Texture* texColor = Texture::create("targetColor", 512, 512, Texture::Format::RGBA, Texture::Type::TEXTURE_RT);
+    std::vector<Texture*> textures;
+    textures.push_back(texColor);
+    _frameBuffer = FrameBuffer::create("myFrameBuffer", textures);
+
+    View::create(1, Rectangle(512, 512), View::ClearFlags::COLOR_DEPTH, 0xaaaaaaff, 1.0f, 0);*/
+
+
+     View::create(1, Rectangle(512, 512), View::ClearFlags::COLOR_DEPTH, 0x000000ff, 1.0f, 0);
+
+
+#define FRAMEBUFFER_WIDTH 512
+#define FRAMEBUFFER_HEIGHT 512
+
+    Texture* texColor = Texture::create("targetColor", FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, Texture::Format::RGBA, Texture::Type::TEXTURE_RT);
+    Texture* texDepth = Texture::create("targetDepth", FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, Texture::Format::D16, Texture::Type::TEXTURE_RT);
+    std::vector<Texture*> textures;
+    textures.push_back(texColor);
+    textures.push_back(texDepth);
+    _frameBuffer = FrameBuffer::create("MyFrameBuffer", textures);
+
+
+
+
+
+    // Create a quad for framebuffer preview
+    Mesh* mesh = Mesh::createQuad(0,0,256,256);
+    _quadModel = Model::create(mesh);
+    SAFE_RELEASE(mesh);
+    _quadModel->setMaterial("res/core/shaders/debug.vert", "res/core/shaders/debug.frag", "SHOW_TEXTURE");
+    _quadModel->getMaterial()->getParameter("u_texture")->setValue(_frameBuffer->getRenderTarget(0));
 
 }
 
@@ -154,14 +187,26 @@ void SpkRenderer::update(float elapsedTime)
     // call super class method
     GPRenderer3D::update(elapsedTime);
 
+    ImGui::Begin("Game rendering");
+    {
+        bgfx::TextureHandle th = _frameBuffer->getRenderTarget(0)->getTexture()->getHandle()->getHandle();
+        ImGui::Image(th, ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, -1) );
+    }
+    ImGui::End();
+
     _scene->visit(this, &SpkRenderer::updateEmitters, elapsedTime);
 
 }
 
+
 void SpkRenderer::render(float elapsedTime)
 {
-    View::getView(0)->bind();
+    View::getView(1)->bind();
+    _frameBuffer->bind();
     _scene->visit(this, &SpkRenderer::drawScene);
+
+    View::getView(0)->bind();
+   _scene->visit(this, &SpkRenderer::drawScene);
 }
 
 bool SpkRenderer::drawScene(Node* node)

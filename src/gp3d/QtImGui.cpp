@@ -9,7 +9,13 @@
 
 #include "../renderer/BGFXImGui.h"
 
+// bgfx imgui
+#include <thirdparty/bgfxcommon/common.h>
+#include <thirdparty/bgfxcommon/imgui/bgfximgui.h>
+entry::MouseState m_mouseState;
+
 namespace QtImGui {
+
 
 class QWidgetWindowWrapper : public WindowWrapper
 {
@@ -47,6 +53,11 @@ void initialize(QWidget *window)
 void newFrame()
 {
     ImGuiRenderer::instance()->newFrame();
+}
+
+void endFrame()
+{
+    ImGuiRenderer::instance()->endFrame();
 }
 
 
@@ -91,16 +102,17 @@ void ImGuiRenderer::initialize(WindowWrapper *window)
     ImGui::CreateContext();
 
     // Create bgfx imgui
-    gplay::GPImGui::getInstance()->imguiInit();
+    ///gplay::GPImGui::getInstance()->imguiInit();
+    imguiCreate();
 
     ImGuiIO &io = ImGui::GetIO();
     for (ImGuiKey key : keyMap.values()) {
         io.KeyMap[key] = key;
     }
 
-    io.RenderDrawListsFn = [](ImDrawData *drawData) {
-        gplay::GPImGui::getInstance()->imguiRender(drawData);
-    };
+    ///io.RenderDrawListsFn = [](ImDrawData *drawData) {
+    ///    gplay::GPImGui::getInstance()->imguiRender(drawData);
+    ///};
 
     io.SetClipboardTextFn = [](void *user_data, const char *text) {
         Q_UNUSED(user_data);
@@ -114,6 +126,11 @@ void ImGuiRenderer::initialize(WindowWrapper *window)
     };
 
     window->installEventFilter(this);
+}
+
+void ImGuiRenderer::endFrame()
+{
+    imguiEndFrame();
 }
 
 void ImGuiRenderer::newFrame()
@@ -154,8 +171,27 @@ void ImGuiRenderer::newFrame()
     // Hide OS mouse cursor if ImGui is drawing it
     // glfwSetInputMode(g_Window, GLFW_CURSOR, io.MouseDrawCursor ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 
+    // bgfx imgui mouse state
+    m_mouseState.m_mx = io.MousePos.x;
+    m_mouseState.m_my = io.MousePos.y;
+    m_mouseState.m_buttons[entry::MouseButton::Left] = io.MouseDown[0];
+    m_mouseState.m_buttons[entry::MouseButton::Right] = io.MouseDown[1];
+    m_mouseState.m_buttons[entry::MouseButton::Middle] = io.MouseDown[2];
+
+
     // Start the frame
-    ImGui::NewFrame();
+    ///ImGui::NewFrame();
+    imguiBeginFrame(
+                m_mouseState.m_mx
+                ,  m_mouseState.m_my
+                , (m_mouseState.m_buttons[entry::MouseButton::Left] ? IMGUI_MBUT_LEFT : 0)
+            | (m_mouseState.m_buttons[entry::MouseButton::Right] ? IMGUI_MBUT_RIGHT : 0)
+            | (m_mouseState.m_buttons[entry::MouseButton::Middle] ? IMGUI_MBUT_MIDDLE : 0)
+            ,  m_mouseState.m_mz
+            , uint16_t(m_window->size().width())
+            , uint16_t(m_window->size().height())
+            );
+
 }
 
 void ImGuiRenderer::onMousePressedChange(QMouseEvent *event)

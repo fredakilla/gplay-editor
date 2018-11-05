@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include <QPoint>
-#include <thirdparty/imgui/imgui.h>
+#include <thirdparty/bgfxcommon/imgui/bgfximgui.h>
 #include <memory>
 
 class QMouseEvent;
@@ -13,6 +13,7 @@ namespace QtImGui {
 
 void initialize(QWidget *window);
 void newFrame();
+void endFrame();
 
 class WindowWrapper
 {
@@ -31,6 +32,7 @@ class ImGuiRenderer : public QObject
 public:
     void initialize(WindowWrapper *window);
     void newFrame();
+    void endFrame();
     bool eventFilter(QObject *watched, QEvent *event);
     static ImGuiRenderer *instance();
 

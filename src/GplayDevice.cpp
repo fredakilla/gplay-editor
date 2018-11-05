@@ -49,7 +49,8 @@ void GplayDeviceGame::runFrame()
     frame();
 
     // end frame
-    ImGui::Render();
+    //ImGui::Render();
+    QtImGui::endFrame();
     Renderer::getInstance().endFrame();
 }
 

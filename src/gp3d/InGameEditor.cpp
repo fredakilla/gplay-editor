@@ -1,6 +1,6 @@
 #include "InGameEditor.h"
 #include <gplay-engine.h>
-#include <thirdparty/imgui/imgui.h>
+#include <thirdparty/bgfxcommon/imgui/bgfximgui.h>
 
 using namespace gplay;
 
@@ -522,7 +522,7 @@ struct LogWindow
         }
 
         if (ScrollToBottom)
-            ImGui::SetScrollHere(1.0f);
+            ImGui::SetScrollHereY(1.0f);
         ScrollToBottom = false;
         ImGui::EndChild();
         ImGui::End();
@@ -620,6 +620,7 @@ std::streamsize LogStreamer::xsputn(const char *p, std::streamsize n)
 static gpeditor::LogWindow _logWindow;
 static gpeditor::LogStreamer* _logStream;
 
+
 using namespace gpeditor;
 
 
@@ -684,14 +685,15 @@ void InGameEditor::setScene(Scene* scene)
     nodeBox->setRotation(q);
 
     SAFE_RELEASE(nodeBox);
+
 }
 
 void InGameEditor::update(float elapsedTime)
 {
     if(_scene)
     {
-        ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-        ImGui::ShowTestWindow();
+        //ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
+        //ImGui::ShowTestWindow();
 
         // show scene hierarchy window
         _sceneHierarchy->draw(_scene);
@@ -701,7 +703,6 @@ void InGameEditor::update(float elapsedTime)
 
         // show log window
         _logWindow.draw("Log");
-
     }
 }
 
